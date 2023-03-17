@@ -1,12 +1,16 @@
-import { KeyboardAvoidingView, StyleSheet,View } from 'react-native'
-import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
+import { KeyboardAvoidingView, StyleSheet, View } from 'react-native'
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, TextInput } from 'react-native-paper'
 import { auth } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainStackParamList } from '../main/Main'
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Login'>;
+type Props = NativeStackScreenProps<MainStackParamList, 'Login'>
 
 const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('')
@@ -35,7 +39,7 @@ const LoginScreen = ({ navigation }: Props) => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user
-        console.log('Logged in with ' +user.email)
+        console.log('Logged in with ' + user.email)
       })
       .catch((error) => alert(error.message))
   }
@@ -44,7 +48,13 @@ const LoginScreen = ({ navigation }: Props) => {
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <View style={styles.loginContainer}>
         <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-        <TextInput placeholder="Password" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          style={styles.input}
+          secureTextEntry
+        />
       </View>
       <View style={styles.buttonContainer}>
         <Button mode="contained" onPress={handleLogin} style={styles.button}>
@@ -64,7 +74,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   loginContainer: {
     width: '80%',

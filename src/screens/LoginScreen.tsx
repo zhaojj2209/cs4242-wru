@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, StyleSheet, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -32,7 +32,7 @@ const LoginScreen = ({ navigation }: Props) => {
         const user = userCredential.user
         console.log('Registered with ' + user.email)
       })
-      .catch((error) => alert(error.message))
+      .catch((error) => Alert.alert(error.message))
   }
 
   const handleLogin = () => {
@@ -41,12 +41,12 @@ const LoginScreen = ({ navigation }: Props) => {
         const user = userCredential.user
         console.log('Logged in with ' + user.email)
       })
-      .catch((error) => alert(error.message))
+      .catch((error) => Alert.alert(error.message))
   }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <View style={styles.loginContainer}>
+      <View style={styles.inputContainer}>
         <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
         <TextInput
           placeholder="Password"
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginContainer: {
+  inputContainer: {
     width: '80%',
   },
   input: {

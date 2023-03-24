@@ -1,13 +1,13 @@
 import React from 'react'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
-import SettingsScreen from './SettingsScreen'
-import DiscoverScreen from './DiscoverScreen'
-import ChatsScreen from './ChatsScreen'
+import SettingsTab from './SettingsTab'
+import DiscoverTab from './DiscoverTab'
+import ChatsTab from './ChatsTab'
 
 export type HomeTabParamList = {
-  Discover: undefined
-  Chats: undefined
-  Settings: undefined
+  DiscoverTab: undefined
+  ChatsTab: undefined
+  SettingsTab: undefined
 }
 
 const Tab = createMaterialBottomTabNavigator<HomeTabParamList>()
@@ -16,24 +16,24 @@ const HomeScreen = () => {
   return (
     <Tab.Navigator>
       <Tab.Screen
-        name="Discover"
-        component={DiscoverScreen}
+        name="DiscoverTab"
+        component={DiscoverTab}
         options={{
           tabBarLabel: 'Discover',
           tabBarIcon: 'map-search-outline',
         }}
       />
       <Tab.Screen
-        name="Chats"
-        component={ChatsScreen}
+        name="ChatsTab"
+        component={ChatsTab}
         options={{
           tabBarLabel: 'Chats',
           tabBarIcon: 'chat-outline',
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
+        name="SettingsTab"
+        component={SettingsTab}
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: 'cog-outline',

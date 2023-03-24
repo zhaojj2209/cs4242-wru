@@ -10,11 +10,11 @@ import { MaterialBottomTabScreenProps } from '@react-navigation/material-bottom-
 import { MainStackParamList } from '../main/Main'
 
 type Props = CompositeScreenProps<
-  MaterialBottomTabScreenProps<HomeTabParamList, 'Settings'>,
+  MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
   NativeStackScreenProps<MainStackParamList>
 >
 
-const SettingsScreen = ({ navigation }: Props) => {
+const SettingsTab = ({ navigation }: Props) => {
   const handleLogout = () => {
     signOut(auth).then(() => {
       navigation.replace('Login')
@@ -30,7 +30,7 @@ const SettingsScreen = ({ navigation }: Props) => {
   )
 }
 
-export default SettingsScreen
+export default SettingsTab
 
 const styles = StyleSheet.create({
   container: {

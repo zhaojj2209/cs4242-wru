@@ -1,10 +1,15 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import React from 'react'
+import { Button } from 'react-native-paper'
+import { ChatsStackParamList } from './ChatsTab'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
 
-const ChatsScreen = () => {
+type Props = NativeStackScreenProps<ChatsStackParamList, 'Chats'>
+
+const ChatsScreen = ({ navigation }: Props) => {
   return (
     <View style={styles.container}>
-      <Text>Chats Screen</Text>
+      <Button onPress={() => navigation.navigate('CreateChat')}>Create Event Chat</Button>
     </View>
   )
 }

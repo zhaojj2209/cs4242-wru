@@ -85,16 +85,11 @@ const CreateChatScreen = ({ navigation }: Props) => {
         )}
         {Platform.OS === 'android' && (
           <>
-            <TextInput
-              value={date.toLocaleString()}
-              style={styles.input}
-              disabled
-            />
-            <Button onPress={showDatepicker}>
-              Select date
+            <Button mode='contained-tonal' onPress={showDatepicker} style={styles.button}>
+              {date.toDateString()}
             </Button>
-            <Button onPress={showTimepicker}>
-              Select time
+            <Button mode='contained-tonal' onPress={showTimepicker} style={styles.button}>
+              {date.getHours().toString().padStart(2, "0") + ':' + date.getMinutes().toString().padStart(2, "0")}
             </Button>
             {openDatepicker && (
               <DateTimePicker

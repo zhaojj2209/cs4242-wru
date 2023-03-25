@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React from 'react'
-import { Button } from 'react-native-paper'
+import { Button, Text } from 'react-native-paper'
 import { auth } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { signOut } from 'firebase/auth'
@@ -22,9 +22,10 @@ const SettingsTab = ({ navigation }: Props) => {
   }
   return (
     <View style={styles.container}>
+      <Text>Display Name: {auth.currentUser?.displayName}</Text>
       <Text>Email: {auth.currentUser?.email}</Text>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
-        Log out
+        Log Out
       </Button>
     </View>
   )

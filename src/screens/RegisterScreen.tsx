@@ -1,16 +1,18 @@
 import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
-import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
 import { auth } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainStackParamList } from '../main/Main'
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Login'>
+type Props = NativeStackScreenProps<MainStackParamList, 'Register'>
 
-const LoginScreen = ({ navigation }: Props) => {
+const RegisterScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordRepeat, setPasswordRepeat] = useState('')
+  const [displayName, setDisplayName] = useState('')
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,11 +29,18 @@ const LoginScreen = ({ navigation }: Props) => {
     return `Error: ${msgCode.replaceAll('-', ' ').replace(').', '!')}`
   }
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
+  const handleRegister = () => {
+    if (passwordRepeat !== password) {
+      Alert.alert('Error: Passwords do not match!')
+      return
+    }
+    createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user
-        console.log('Logged in with ' + user.email)
+        if (displayName.length > 0) {
+          updateProfile(user, { displayName })
+        }
+        Alert.alert('Account created!')
       })
       .catch((error) => Alert.alert(formatError(error.message)))
   }
@@ -39,7 +48,7 @@ const LoginScreen = ({ navigation }: Props) => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <Text variant="headlineLarge" style={styles.titleText}>
-        Log In
+        Register
       </Text>
       <View style={styles.inputContainer}>
         <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
@@ -50,21 +59,34 @@ const LoginScreen = ({ navigation }: Props) => {
           style={styles.input}
           secureTextEntry
         />
+        <TextInput
+          placeholder="Re-enter Password"
+          value={passwordRepeat}
+          onChangeText={setPasswordRepeat}
+          style={styles.input}
+          secureTextEntry
+        />
+        <TextInput
+          placeholder="Display Name (Optional)"
+          value={displayName}
+          onChangeText={setDisplayName}
+          style={styles.input}
+        />
       </View>
       <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={handleLogin} style={styles.button}>
-          Log In
+        <Button mode="contained" onPress={handleRegister} style={styles.button}>
+          Register
         </Button>
       </View>
       <View style={styles.navigateContainer}>
-        <Text variant="bodyLarge">Don&apos;t have an account?</Text>
-        <Button onPress={() => navigation.navigate('Register')}>Register</Button>
+        <Text variant="bodyLarge">Already have an account?</Text>
+        <Button onPress={() => navigation.goBack()}>Log In</Button>
       </View>
     </KeyboardAvoidingView>
   )
 }
 
-export default LoginScreen
+export default RegisterScreen
 
 const styles = StyleSheet.create({
   container: {

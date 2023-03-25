@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
   },
   titleText: {
     width: '75%',
-    paddingBottom: 40,
+    marginBottom: 40,
   },
   input: {
     margin: 5,
   },
   buttonContainer: {
     width: '60%',
-    marginTop: 20,
+    marginTop: 40,
   },
   button: {
     margin: 5,

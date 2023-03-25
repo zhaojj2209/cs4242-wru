@@ -1,24 +1,25 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import { Button, List } from 'react-native-paper'
+import { ActivityIndicator, Appbar, List } from 'react-native-paper'
 import { ChatsStackParamList } from './ChatsTab'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat } from '../util/types'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'Chats'>
 
 const ChatsScreen = ({ navigation }: Props) => {
   const [chats, setChats] = useState<EventChat[]>([])
+  const [loading, setLoading] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
       if (!auth.currentUser) {
         return
       }
+      setLoading(true)
       const q = query(collection(db, 'chats'), where('members', 'array-contains', auth.currentUser.uid))
       getDocs(q)
         .then((docs) => {
@@ -30,15 +31,20 @@ const ChatsScreen = ({ navigation }: Props) => {
             } as EventChat)
           })
           setChats(data)
+          setLoading(false)
         })
 
     }, [])
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Button onPress={() => navigation.navigate('CreateChat')}>Create Event Chat</Button>
+    <View style={styles.container}>
+      <Appbar.Header mode="center-aligned" elevated>
+        <Appbar.Content title="Chats" />
+        <Appbar.Action icon="square-edit-outline" onPress={() => navigation.navigate('CreateChat')} />
+      </Appbar.Header>
       <List.Section>
+        {loading && (<ActivityIndicator />)}
         {chats.map((chat) => (
           <List.Item
             key={chat.id}
@@ -48,7 +54,7 @@ const ChatsScreen = ({ navigation }: Props) => {
           />
         ))}
       </List.Section>
-    </SafeAreaView>
+    </View>
   )
 }
 

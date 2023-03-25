@@ -1,6 +1,6 @@
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import React, { useState } from 'react'
-import { Button, TextInput } from 'react-native-paper'
+import { Button, Text, TextInput } from 'react-native-paper'
 import { auth, db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { ChatsStackParamList } from './ChatsTab'
@@ -65,6 +65,9 @@ const CreateChatScreen = ({ navigation }: Props) => {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <Text variant="headlineLarge" style={styles.titleText}>
+        Create Event Chat
+      </Text>
       <View style={styles.inputContainer}>
         <TextInput placeholder="Title" value={title} onChangeText={setTitle} style={styles.input} />
         <TextInput
@@ -73,15 +76,15 @@ const CreateChatScreen = ({ navigation }: Props) => {
           onChangeText={setDescription}
           style={styles.input}
         />
+        <Text variant="bodyLarge" style={styles.dateLabel}>Date of Event:</Text>
         {Platform.OS === 'ios' && (
-          <>
+          <View style={styles.iosDatetime}>
             <DateTimePicker
               value={date}
               mode={'datetime' as any}
-              is24Hour={true}
               onChange={onChange}
             />
-          </>
+          </View>
         )}
         {Platform.OS === 'android' && (
           <>
@@ -89,7 +92,7 @@ const CreateChatScreen = ({ navigation }: Props) => {
               {date.toDateString()}
             </Button>
             <Button mode='contained-tonal' onPress={showTimepicker} style={styles.button}>
-              {date.getHours().toString().padStart(2, "0") + ':' + date.getMinutes().toString().padStart(2, "0")}
+              {date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')}
             </Button>
             {openDatepicker && (
               <DateTimePicker
@@ -106,6 +109,9 @@ const CreateChatScreen = ({ navigation }: Props) => {
         <Button mode="contained" onPress={handleCreateChat} style={styles.button}>
           Create Chat
         </Button>
+        <Button mode="outlined" onPress={() => navigation.goBack()} style={styles.button}>
+          Cancel
+        </Button>
       </View>
     </KeyboardAvoidingView>
   )
@@ -119,17 +125,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  titleText: {
+    width: '75%',
+    marginBottom: 40,
+  },
   inputContainer: {
     width: '80%',
   },
   input: {
     margin: 5,
   },
+  dateLabel: {
+    marginLeft: 20,
+    marginTop: 10,
+  },
   buttonContainer: {
     width: '60%',
-    marginTop: 20,
+    marginTop: 40,
   },
   button: {
     margin: 5,
+  },
+  iosDatetime: {
+    marginTop: 10,
+    flexDirection: 'row',
   },
 })

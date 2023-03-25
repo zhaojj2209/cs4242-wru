@@ -14,7 +14,7 @@ const ChatsTab = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen options={{ headerShown: false }} name="Chats" component={ChatsScreen} />
-      <Stack.Screen name="CreateChat" component={CreateChatScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="CreateChat" component={CreateChatScreen} />
     </Stack.Navigator>
   )
 }

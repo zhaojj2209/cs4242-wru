@@ -9,3 +9,14 @@ export interface EventChat {
   creator: string
   members: string[]
 }
+
+export interface Message {
+  _id: number,
+  text: string,
+  createdAt: Date,
+  user: {
+      _id: number,
+      name: string,
+      avatar: string,
+  },
+}

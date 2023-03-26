@@ -1,4 +1,4 @@
-import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
 import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={Platform.select({ios: 0, android: -500})}>
       <Text variant="headlineLarge" style={styles.titleText}>
         Log In
       </Text>

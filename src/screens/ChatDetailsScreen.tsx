@@ -1,12 +1,21 @@
 import { Alert, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Appbar, Button, Card, Divider, Text } from 'react-native-paper'
+import {
+  ActivityIndicator,
+  Appbar,
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  List,
+  Text,
+} from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
-import { deleteDoc, doc, getDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
-import { EventChat } from '../util/types'
+import { EventChat, User } from '../util/types'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ChatDetails'>
 
@@ -15,6 +24,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
   const [details, setDetails] = useState<EventChat | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [isCreator, setIsCreator] = useState(false)
+  const [members, setMembers] = useState<User[]>([])
 
   useFocusEffect(
     useCallback(() => {
@@ -33,6 +43,18 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
             ...data,
           } as EventChat)
           setIsCreator(data.creator === auth.currentUser?.uid)
+          const q = query(
+            collection(db, 'users'),
+            where('uid', 'in', data.members)
+          )
+          getDocs(q).then((docs) => {
+            const members: User[] = []
+            docs.forEach((doc) => {
+              members.push(doc.data() as User)
+            })
+            setMembers(members)
+            setLoading(false)
+          })
           setLoading(false)
         } else {
           Alert.alert('Error: Event does not exist!')
@@ -104,9 +126,22 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
         </Card>
       )}
       <View style={styles.details}>
-        <Text variant="titleLarge">Members:</Text>
+        <View style={styles.memberHeader}>
+          <Text variant="titleLarge">Members:</Text>
+          <Button>Add members</Button>
+        </View>
         <Card style={styles.members}>
-          <Card.Content></Card.Content>
+          <Card.Content>
+            <List.Section>
+              {members.map((member, idx) => (
+                <List.Item
+                  key={idx}
+                  title={member.displayName ?? member.email}
+                  left={(props) => <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />}
+                />
+              ))}
+            </List.Section>
+          </Card.Content>
         </Card>
       </View>
       <View style={styles.delete}>
@@ -129,6 +164,11 @@ const styles = StyleSheet.create({
   },
   text: {
     paddingVertical: 10,
+  },
+  memberHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   members: {
     marginTop: 20,

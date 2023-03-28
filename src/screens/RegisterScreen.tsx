@@ -35,6 +35,10 @@ const RegisterScreen = ({ navigation }: Props) => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user
+        setEmail('')
+        setPassword('')
+        setPasswordRepeat('')
+        setDisplayName('')
 
         updateProfile(user, {
           displayName,
@@ -42,6 +46,7 @@ const RegisterScreen = ({ navigation }: Props) => {
         })
 
         setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
           email: user.email,
           displayName,
           photoURL: defaultURL,

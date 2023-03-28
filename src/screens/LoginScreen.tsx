@@ -32,6 +32,8 @@ const LoginScreen = ({ navigation }: Props) => {
       .then((userCredential) => {
         const user = userCredential.user
         console.log('Logged in with ' + user.email)
+        setEmail('')
+        setPassword('')
       })
       .catch((error) => Alert.alert(formatError(error.message)))
   }

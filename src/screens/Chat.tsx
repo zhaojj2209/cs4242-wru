@@ -99,12 +99,13 @@ const ChatScreen = ({ route, navigation }: Props) => {
         onSend={(messages) => onSend(messages)}
         user={{
             _id: auth?.currentUser?.uid ??  0,
-            name: auth?.currentUser?.displayName ?? 'null',
+            name: auth?.currentUser?.displayName ?? 'try',
             // avatar: auth?.currentUser?.photoURL
         }}
         renderBubble={renderBubble}
         renderSend={renderSend}
         alwaysShowSend={true}
+        renderUsernameOnMessage={true} 
         />  
             )
 }

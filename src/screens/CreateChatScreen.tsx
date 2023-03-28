@@ -1,43 +1,27 @@
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
 import React, { useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
 import { auth, db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { ChatsStackParamList } from './ChatsTab'
 import { addDoc, collection } from 'firebase/firestore'
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
+import DatePicker from '../components/DatePicker'
 
 type Props = NativeStackScreenProps<ChatsStackParamList, 'CreateChat'>
 
 const CreateChatScreen = ({ navigation }: Props) => {
+  const ONE_HOUR_IN_MILLISECONDS = 3600 * 1000
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [date, setDate] = useState(new Date())
-  const [mode, setMode] = useState<'date' | 'time'>('date')
-  const [openDatepicker, setOpenDatepicker] = useState(false)
+  const [startDate, setStartDate] = useState(new Date())
+  const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
 
-  const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    setOpenDatepicker(false)
-    if (selectedDate) {
-      setDate(selectedDate)
+  const handleChangeStartDate = (date: Date) => {
+    setStartDate(date)
+    if (date.getTime() > endDate.getTime()) {
+      setEndDate(new Date(date.getTime() + ONE_HOUR_IN_MILLISECONDS))
     }
-  }
-
-  const showMode = (currentMode: 'date' | 'time') => {
-    if (Platform.OS === 'android') {
-      setOpenDatepicker(false)
-      // for iOS, add a button that closes the picker
-    }
-    setOpenDatepicker(true)
-    setMode(currentMode)
-  }
-
-  const showDatepicker = () => {
-    showMode('date')
-  }
-
-  const showTimepicker = () => {
-    showMode('time')
   }
 
   const handleCreateChat = () => {
@@ -47,7 +31,8 @@ const CreateChatScreen = ({ navigation }: Props) => {
     const data = {
       title,
       description,
-      date,
+      startDate,
+      endDate,
       creator: auth.currentUser.uid,
       members: [auth.currentUser.uid],
     }
@@ -77,28 +62,13 @@ const CreateChatScreen = ({ navigation }: Props) => {
           style={styles.input}
         />
         <Text variant="bodyLarge" style={styles.dateLabel}>
-          Date of Event:
+          Event start date:
         </Text>
-        {Platform.OS === 'ios' && (
-          <View style={styles.iosDatetime}>
-            <DateTimePicker value={date} mode={'datetime' as any} onChange={onChange} />
-          </View>
-        )}
-        {Platform.OS === 'android' && (
-          <>
-            <Button mode="contained-tonal" onPress={showDatepicker} style={styles.button}>
-              {date.toDateString()}
-            </Button>
-            <Button mode="contained-tonal" onPress={showTimepicker} style={styles.button}>
-              {date.getHours().toString().padStart(2, '0') +
-                ':' +
-                date.getMinutes().toString().padStart(2, '0')}
-            </Button>
-            {openDatepicker && (
-              <DateTimePicker value={date} mode={mode} is24Hour={true} onChange={onChange} />
-            )}
-          </>
-        )}
+        <DatePicker date={startDate} onChangeCallback={handleChangeStartDate} />
+        <Text variant="bodyLarge" style={styles.dateLabel}>
+          Event end date:
+        </Text>
+        <DatePicker date={endDate} onChangeCallback={setEndDate} />
       </View>
       <View style={styles.buttonContainer}>
         <Button mode="contained" onPress={handleCreateChat} style={styles.button}>

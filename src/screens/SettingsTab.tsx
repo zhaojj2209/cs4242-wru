@@ -1,7 +1,7 @@
 import { StyleSheet, View, TouchableHighlight, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Avatar, Button, Text, useTheme } from 'react-native-paper'
-import { auth, storage } from '../db/firebase'
+import { auth, db, storage } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth'
 import { HomeTabParamList } from './HomeTabs'
@@ -14,6 +14,7 @@ import {
   MediaTypeOptions,
   requestMediaLibraryPermissionsAsync,
 } from 'expo-image-picker'
+import { doc, updateDoc } from 'firebase/firestore'
 
 type Props = CompositeScreenProps<
   MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
@@ -77,7 +78,8 @@ const SettingsTab = ({ navigation }: Props) => {
       const photoURL = await getDownloadURL(fileRef)
 
       if (auth.currentUser != null) {
-        updateProfile(auth.currentUser, { photoURL: photoURL })
+        updateProfile(auth.currentUser, { photoURL })
+        updateDoc(doc(db, 'users', uid), { photoURL })
         setPhotoURL(photoURL)
       }
     } else {

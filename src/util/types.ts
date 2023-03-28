@@ -1,5 +1,12 @@
 import { Timestamp } from 'firebase/firestore'
 
+export interface User {
+  id: string
+  email: string
+  displayName: string
+  photoURL: string
+}
+
 export interface EventChat {
   id: string
   title: string

@@ -56,9 +56,10 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
               Alert.alert('Chat deleted!', '', [
                 {
                   text: 'OK',
-                  onPress: () => navigation.replace('HomeTabs', {
-                    screen: 'ChatsTab'
-                  }),
+                  onPress: () =>
+                    navigation.replace('HomeTabs', {
+                      screen: 'ChatsTab',
+                    }),
                 },
               ])
             )

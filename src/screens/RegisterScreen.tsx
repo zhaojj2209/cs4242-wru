@@ -1,10 +1,12 @@
 import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
-import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
-import { auth } from '../db/firebase'
+import { auth, db, storage } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainStackParamList } from '../main/Main'
+import { doc, setDoc } from 'firebase/firestore'
+import { getDownloadURL, ref } from 'firebase/storage'
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Register'>
 
@@ -13,16 +15,12 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [defaultURL, setDefaultURL] = useState('')
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigation.navigate('Home')
-      }
-    })
-
-    return unsubscribe
-  }, [])
+    const fileRef = ref(storage, 'default.png')
+    getDownloadURL(fileRef).then((url) => setDefaultURL(url))
+  })
 
   const formatError = (msg: string) => {
     const msgCode = msg.split('auth/')[1]
@@ -37,10 +35,26 @@ const RegisterScreen = ({ navigation }: Props) => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user
-        if (displayName.length > 0) {
-          updateProfile(user, { displayName })
-        }
-        Alert.alert('Account created!')
+
+        updateProfile(user, {
+          displayName,
+          photoURL: defaultURL,
+        })
+
+        setDoc(doc(db, 'users', user.uid), {
+          email: user.email,
+          displayName,
+          photoURL: defaultURL,
+        })
+          .then(() => {
+            Alert.alert('Account created!', '', [
+              {
+                text: 'OK',
+                onPress: () => navigation.navigate('Home'),
+              },
+            ])
+          })
+          .catch((error) => Alert.alert(error))
       })
       .catch((error) => Alert.alert(formatError(error.message)))
   }

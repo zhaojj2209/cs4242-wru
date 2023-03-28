@@ -8,7 +8,7 @@ import { EventChat } from '../util/types'
 import { NavigatorScreenParams } from '@react-navigation/native'
 
 export type HomeStackParamList = {
-  HomeTabs: NavigatorScreenParams<HomeTabParamList>,
+  HomeTabs: NavigatorScreenParams<HomeTabParamList>
   Chat: {
     user?: string
     chatID?: string

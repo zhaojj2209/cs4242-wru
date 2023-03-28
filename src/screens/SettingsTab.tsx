@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableHighlight, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Avatar, Button, Text } from 'react-native-paper'
+import { Avatar, Button, Text, useTheme } from 'react-native-paper'
 import { auth, storage } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth'
@@ -17,6 +17,8 @@ type Props = CompositeScreenProps<
 >
 
 const SettingsTab = ({ navigation }: Props) => {
+  const theme = useTheme();
+  
   const [displayName, setDisplayName] = useState('')
   const [photoURL, setPhotoURL] = useState('')
   const handleLogout = () => {
@@ -73,6 +75,7 @@ const SettingsTab = ({ navigation }: Props) => {
   
       if (auth.currentUser != null) {
         updateProfile(auth.currentUser, {photoURL: photoURL})
+        setPhotoURL(photoURL)
       }
     } else {
       Alert.alert("error")
@@ -83,13 +86,17 @@ const SettingsTab = ({ navigation }: Props) => {
     <View style={styles.container}>
       <>
         {auth.currentUser != null &&
-          auth.currentUser.photoURL == null
-            ? <TouchableHighlight onPress={() => {upload(auth.currentUser?.uid)} }>
-              <View>
-                <Avatar.Text size={100} label={displayName}/>
-              </View>
+          photoURL == ''
+            ? <TouchableHighlight onPress={() => {upload(auth.currentUser?.uid)} } underlayColor={theme.colors.background}>
+                <View>
+                  <Avatar.Text size={100} label={displayName}/>
+                </View>
               </TouchableHighlight>
-            : <Avatar.Image size={100} source={{uri: photoURL}}/>
+            : <TouchableHighlight onPress={() => {upload(auth.currentUser?.uid)} } underlayColor={theme.colors.background}>
+                <View>
+                  <Avatar.Image size={100} source={{uri: photoURL}}/>
+                </View>
+              </TouchableHighlight>
         }
       </>
       <Text>Display Name: {auth.currentUser?.displayName}</Text>

@@ -20,3 +20,12 @@ export interface Message {
     avatar: string
   }
 }
+
+export interface EventChatFormParams {
+  title: string
+  description: string
+  startDate: Date
+  endDate: Date
+  creator: string
+  members: string[]
+}

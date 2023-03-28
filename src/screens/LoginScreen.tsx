@@ -1,4 +1,4 @@
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native'
+import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
@@ -37,34 +37,37 @@ const LoginScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-      keyboardVerticalOffset={Platform.select({ ios: 0, android: -500 })}
-    >
-      <Text variant="headlineLarge" style={styles.titleText}>
-        Log In
-      </Text>
-      <View style={styles.inputContainer}>
-        <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-          secureTextEntry
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={handleLogin} style={styles.button}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text variant="headlineLarge" style={styles.titleText}>
           Log In
-        </Button>
+        </Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button mode="contained" onPress={handleLogin} style={styles.button}>
+            Log In
+          </Button>
+        </View>
+        <View style={styles.navigateContainer}>
+          <Text variant="bodyLarge">Don&apos;t have an account?</Text>
+          <Button onPress={() => navigation.navigate('Register')}>Register</Button>
+        </View>
       </View>
-      <View style={styles.navigateContainer}>
-        <Text variant="bodyLarge">Don&apos;t have an account?</Text>
-        <Button onPress={() => navigation.navigate('Register')}>Register</Button>
-      </View>
-    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   )
 }
 

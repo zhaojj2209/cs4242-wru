@@ -24,21 +24,20 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       }
       setLoading(true)
       const docRef = doc(db, 'chats', chatID)
-      getDoc(docRef)
-        .then((document) => {
-          if (document.exists()) {
-            const data = document.data()
-            setDetails({
-              id: chatID,
-              ...data,
-            } as EventChat)
-            setLoading(false)
-          } else {
-            Alert.alert('Error: Event does not exist!')
-            navigation.goBack()
-            setLoading(false)
-          }
-        })
+      getDoc(docRef).then((document) => {
+        if (document.exists()) {
+          const data = document.data()
+          setDetails({
+            id: chatID,
+            ...data,
+          } as EventChat)
+          setLoading(false)
+        } else {
+          Alert.alert('Error: Event does not exist!')
+          navigation.goBack()
+          setLoading(false)
+        }
+      })
     }, [])
   )
 
@@ -47,25 +46,24 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       <Appbar.Header mode="center-aligned" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={`${details?.title ?? ''} Chat Details`} />
-        <Appbar.Action
-          icon="square-edit-outline"
-          onPress={() => {}}
-        />
+        <Appbar.Action icon="square-edit-outline" onPress={() => {}} />
       </Appbar.Header>
       {loading && <ActivityIndicator />}
       {!loading && (
         <Card style={styles.details}>
           <Card.Content>
-            <Text variant='titleMedium' style={styles.text}>
+            <Text variant="titleMedium" style={styles.text}>
               Description: {details?.description}
             </Text>
             <Divider />
-            <Text variant='titleMedium' style={styles.text}>
-              Start date: {details?.startDate.toDate().toLocaleDateString()} {details?.startDate.toDate().toLocaleTimeString()}
+            <Text variant="titleMedium" style={styles.text}>
+              Start date: {details?.startDate.toDate().toLocaleDateString()}{' '}
+              {details?.startDate.toDate().toLocaleTimeString()}
             </Text>
             <Divider />
-            <Text variant='titleMedium' style={styles.text}>
-              End date: {details?.endDate.toDate().toLocaleDateString()} {details?.endDate.toDate().toLocaleTimeString()}
+            <Text variant="titleMedium" style={styles.text}>
+              End date: {details?.endDate.toDate().toLocaleDateString()}{' '}
+              {details?.endDate.toDate().toLocaleTimeString()}
             </Text>
           </Card.Content>
         </Card>
@@ -73,9 +71,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       <View style={styles.details}>
         <Text variant="titleLarge">Members:</Text>
         <Card style={styles.members}>
-          <Card.Content>
-
-          </Card.Content>
+          <Card.Content></Card.Content>
         </Card>
       </View>
     </View>
@@ -96,5 +92,5 @@ const styles = StyleSheet.create({
   },
   members: {
     marginTop: 20,
-  }
+  },
 })

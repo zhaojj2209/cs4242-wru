@@ -1,4 +1,4 @@
-import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
+import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth'
 import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
@@ -46,43 +46,50 @@ const RegisterScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <Text variant="headlineLarge" style={styles.titleText}>
-        Register
-      </Text>
-      <View style={styles.inputContainer}>
-        <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-          secureTextEntry
-        />
-        <TextInput
-          placeholder="Re-enter Password"
-          value={passwordRepeat}
-          onChangeText={setPasswordRepeat}
-          style={styles.input}
-          secureTextEntry
-        />
-        <TextInput
-          placeholder="Display Name (Optional)"
-          value={displayName}
-          onChangeText={setDisplayName}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={handleRegister} style={styles.button}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text variant="headlineLarge" style={styles.titleText}>
           Register
-        </Button>
+        </Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+          />
+          <TextInput
+            placeholder="Re-enter Password"
+            value={passwordRepeat}
+            onChangeText={setPasswordRepeat}
+            style={styles.input}
+            secureTextEntry
+          />
+          <TextInput
+            placeholder="Display Name (Optional)"
+            value={displayName}
+            onChangeText={setDisplayName}
+            style={styles.input}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button mode="contained" onPress={handleRegister} style={styles.button}>
+            Register
+          </Button>
+        </View>
+        <View style={styles.navigateContainer}>
+          <Text variant="bodyLarge">Already have an account?</Text>
+          <Button onPress={() => navigation.goBack()}>Log In</Button>
+        </View>
       </View>
-      <View style={styles.navigateContainer}>
-        <Text variant="bodyLarge">Already have an account?</Text>
-        <Button onPress={() => navigation.goBack()}>Log In</Button>
-      </View>
-    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   )
 }
 

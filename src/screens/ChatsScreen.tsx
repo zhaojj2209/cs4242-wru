@@ -3,12 +3,16 @@ import React, { useCallback, useState } from 'react'
 import { ActivityIndicator, Appbar, List } from 'react-native-paper'
 import { ChatsStackParamList } from './ChatsTab'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { useFocusEffect } from '@react-navigation/native'
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat } from '../util/types'
+import { HomeStackParamList } from './HomeScreen'
 
-type Props = NativeStackScreenProps<ChatsStackParamList, 'Chats'>
+type Props = CompositeScreenProps<
+  NativeStackScreenProps<ChatsStackParamList, 'Chats'>,
+  NativeStackScreenProps<HomeStackParamList>
+>
 
 const ChatsScreen = ({ navigation }: Props) => {
   const [chats, setChats] = useState<EventChat[]>([])

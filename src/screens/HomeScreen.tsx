@@ -1,45 +1,32 @@
 import React from 'react'
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
-import SettingsTab from './SettingsTab'
-import DiscoverTab from './DiscoverTab'
-import ChatsTab from './ChatsTab'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import HomeTabs from './HomeTabs'
+import ChatScreen from './ChatScreen'
 
-export type HomeTabParamList = {
-  DiscoverTab: undefined
-  ChatsTab: undefined
-  SettingsTab: undefined
+export type HomeStackParamList = {
+  HomeTabs: undefined
+  Chat: {
+    user: string | undefined
+    chatID: string | undefined
+    title: string | undefined
+  }
 }
 
-const Tab = createMaterialBottomTabNavigator<HomeTabParamList>()
+const Stack = createNativeStackNavigator<HomeStackParamList>()
 
 const HomeScreen = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="DiscoverTab"
-        component={DiscoverTab}
-        options={{
-          tabBarLabel: 'Discover',
-          tabBarIcon: 'map-search-outline',
-        }}
+    <Stack.Navigator>
+      <Stack.Screen options={{ headerShown: false }} name="HomeTabs" component={HomeTabs} />
+      <Stack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={({ route, navigation }) => ({
+          title: route.params.title,
+          headerShown: false,
+        })}
       />
-      <Tab.Screen
-        name="ChatsTab"
-        component={ChatsTab}
-        options={{
-          tabBarLabel: 'Chats',
-          tabBarIcon: 'chat-outline',
-        }}
-      />
-      <Tab.Screen
-        name="SettingsTab"
-        component={SettingsTab}
-        options={{
-          tabBarLabel: 'Settings',
-          tabBarIcon: 'cog-outline',
-        }}
-      />
-    </Tab.Navigator>
+    </Stack.Navigator>
   )
 }
 

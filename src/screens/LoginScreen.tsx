@@ -37,7 +37,11 @@ const LoginScreen = ({ navigation }: Props) => {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding" keyboardVerticalOffset={Platform.select({ios: 0, android: -500})}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.select({ ios: 0, android: -500 })}
+    >
       <Text variant="headlineLarge" style={styles.titleText}>
         Log In
       </Text>

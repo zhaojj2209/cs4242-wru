@@ -49,7 +49,7 @@ const CreateChatScreen = ({ navigation }: Props) => {
       description,
       date,
       creator: auth.currentUser.uid,
-      members: [auth.currentUser.uid]
+      members: [auth.currentUser.uid],
     }
     addDoc(collection(db, 'chats'), data)
       .then(() => {
@@ -76,31 +76,26 @@ const CreateChatScreen = ({ navigation }: Props) => {
           onChangeText={setDescription}
           style={styles.input}
         />
-        <Text variant="bodyLarge" style={styles.dateLabel}>Date of Event:</Text>
+        <Text variant="bodyLarge" style={styles.dateLabel}>
+          Date of Event:
+        </Text>
         {Platform.OS === 'ios' && (
           <View style={styles.iosDatetime}>
-            <DateTimePicker
-              value={date}
-              mode={'datetime' as any}
-              onChange={onChange}
-            />
+            <DateTimePicker value={date} mode={'datetime' as any} onChange={onChange} />
           </View>
         )}
         {Platform.OS === 'android' && (
           <>
-            <Button mode='contained-tonal' onPress={showDatepicker} style={styles.button}>
+            <Button mode="contained-tonal" onPress={showDatepicker} style={styles.button}>
               {date.toDateString()}
             </Button>
-            <Button mode='contained-tonal' onPress={showTimepicker} style={styles.button}>
-              {date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')}
+            <Button mode="contained-tonal" onPress={showTimepicker} style={styles.button}>
+              {date.getHours().toString().padStart(2, '0') +
+                ':' +
+                date.getMinutes().toString().padStart(2, '0')}
             </Button>
             {openDatepicker && (
-              <DateTimePicker
-                value={date}
-                mode={mode}
-                is24Hour={true}
-                onChange={onChange}
-              />
+              <DateTimePicker value={date} mode={mode} is24Hour={true} onChange={onChange} />
             )}
           </>
         )}

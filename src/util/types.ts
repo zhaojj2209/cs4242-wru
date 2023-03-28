@@ -11,12 +11,12 @@ export interface EventChat {
 }
 
 export interface Message {
-  _id: number,
-  text: string,
-  createdAt: Date,
+  _id: number
+  text: string
+  createdAt: Date
   user: {
-      _id: number,
-      name: string,
-      avatar: string,
-  },
+    _id: number
+    name: string
+    avatar: string
+  }
 }

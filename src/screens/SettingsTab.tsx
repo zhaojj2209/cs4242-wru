@@ -8,8 +8,12 @@ import { HomeTabParamList } from './HomeScreen'
 import { CompositeScreenProps } from '@react-navigation/native'
 import { MaterialBottomTabScreenProps } from '@react-navigation/material-bottom-tabs'
 import { MainStackParamList } from '../main/Main'
-import { getDownloadURL, ref, uploadBytes, uploadString } from 'firebase/storage'
-import {getMediaLibraryPermissionsAsync, launchImageLibraryAsync, MediaTypeOptions, requestMediaLibraryPermissionsAsync} from 'expo-image-picker'
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import {
+  launchImageLibraryAsync,
+  MediaTypeOptions,
+  requestMediaLibraryPermissionsAsync,
+} from 'expo-image-picker'
 
 type Props = CompositeScreenProps<
   MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
@@ -17,8 +21,8 @@ type Props = CompositeScreenProps<
 >
 
 const SettingsTab = ({ navigation }: Props) => {
-  const theme = useTheme();
-  
+  const theme = useTheme()
+
   const [displayName, setDisplayName] = useState('')
   const [photoURL, setPhotoURL] = useState('')
   const handleLogout = () => {
@@ -29,7 +33,7 @@ const SettingsTab = ({ navigation }: Props) => {
 
   useEffect(() => {
     if (auth.currentUser?.photoURL) {
-      setPhotoURL(auth.currentUser.photoURL);
+      setPhotoURL(auth.currentUser.photoURL)
     }
   }, [auth.currentUser])
 
@@ -43,11 +47,11 @@ const SettingsTab = ({ navigation }: Props) => {
     return unsubscribe
   }, [])
 
-  const upload = async (uid:string|undefined) => {
+  const upload = async (uid: string | undefined) => {
     if (uid != undefined) {
       const { status } = await requestMediaLibraryPermissionsAsync()
 
-      if (status != "granted") {
+      if (status != 'granted') {
         return
       }
 
@@ -56,7 +60,7 @@ const SettingsTab = ({ navigation }: Props) => {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
-        allowsMultipleSelection: false
+        allowsMultipleSelection: false,
       })
 
       if (canceled) {
@@ -69,35 +73,44 @@ const SettingsTab = ({ navigation }: Props) => {
       const fileRef = ref(storage, uid + '.png')
 
       const snapshot = await uploadBytes(fileRef, pic)
-      
+
       const photoURL = await getDownloadURL(fileRef)
-      console.log(photoURL)
-  
+
       if (auth.currentUser != null) {
-        updateProfile(auth.currentUser, {photoURL: photoURL})
+        updateProfile(auth.currentUser, { photoURL: photoURL })
         setPhotoURL(photoURL)
       }
     } else {
-      Alert.alert("error")
+      Alert.alert('error')
     }
   }
 
   return (
     <View style={styles.container}>
       <>
-        {auth.currentUser != null &&
-          photoURL == ''
-            ? <TouchableHighlight onPress={() => {upload(auth.currentUser?.uid)} } underlayColor={theme.colors.background}>
-                <View>
-                  <Avatar.Text size={100} label={displayName}/>
-                </View>
-              </TouchableHighlight>
-            : <TouchableHighlight onPress={() => {upload(auth.currentUser?.uid)} } underlayColor={theme.colors.background}>
-                <View>
-                  <Avatar.Image size={100} source={{uri: photoURL}}/>
-                </View>
-              </TouchableHighlight>
-        }
+        {auth.currentUser != null && photoURL == '' ? (
+          <TouchableHighlight
+            onPress={() => {
+              upload(auth.currentUser?.uid)
+            }}
+            underlayColor={theme.colors.background}
+          >
+            <View>
+              <Avatar.Text size={100} label={displayName} />
+            </View>
+          </TouchableHighlight>
+        ) : (
+          <TouchableHighlight
+            onPress={() => {
+              upload(auth.currentUser?.uid)
+            }}
+            underlayColor={theme.colors.background}
+          >
+            <View>
+              <Avatar.Image size={100} source={{ uri: photoURL }} />
+            </View>
+          </TouchableHighlight>
+        )}
       </>
       <Text>Display Name: {auth.currentUser?.displayName}</Text>
       <Text>Email: {auth.currentUser?.email}</Text>

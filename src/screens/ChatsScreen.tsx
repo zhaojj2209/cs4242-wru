@@ -20,20 +20,21 @@ const ChatsScreen = ({ navigation }: Props) => {
         return
       }
       setLoading(true)
-      const q = query(collection(db, 'chats'), where('members', 'array-contains', auth.currentUser.uid))
-      getDocs(q)
-        .then((docs) => {
-          const data: EventChat[] = []
-          docs.forEach((doc) => {
-            data.push({
-              id: doc.id,
-              ...doc.data()
-            } as EventChat)
-          })
-          setChats(data)
-          setLoading(false)
+      const q = query(
+        collection(db, 'chats'),
+        where('members', 'array-contains', auth.currentUser.uid)
+      )
+      getDocs(q).then((docs) => {
+        const data: EventChat[] = []
+        docs.forEach((doc) => {
+          data.push({
+            id: doc.id,
+            ...doc.data(),
+          } as EventChat)
         })
-
+        setChats(data)
+        setLoading(false)
+      })
     }, [])
   )
 
@@ -41,21 +42,26 @@ const ChatsScreen = ({ navigation }: Props) => {
     <View style={styles.container}>
       <Appbar.Header mode="center-aligned" elevated>
         <Appbar.Content title="Chats" />
-        <Appbar.Action icon="square-edit-outline" onPress={() => navigation.navigate('CreateChat')} />
+        <Appbar.Action
+          icon="square-edit-outline"
+          onPress={() => navigation.navigate('CreateChat')}
+        />
       </Appbar.Header>
       <List.Section>
-        {loading && (<ActivityIndicator />)}
+        {loading && <ActivityIndicator />}
         {chats.map((chat) => (
           <List.Item
             key={chat.id}
             title={chat.title}
             description={chat.description}
-            left={props => <List.Icon {...props} icon="chat" />}
-            onPress={() => navigation.navigate('Chat', {
-              user: auth?.currentUser?.uid,
-              chatID: chat.id,
-              title: chat.title
-            })}
+            left={(props) => <List.Icon {...props} icon="chat" />}
+            onPress={() =>
+              navigation.navigate('Chat', {
+                user: auth?.currentUser?.uid,
+                chatID: chat.id,
+                title: chat.title,
+              })
+            }
           />
         ))}
       </List.Section>
@@ -66,6 +72,5 @@ const ChatsScreen = ({ navigation }: Props) => {
 export default ChatsScreen
 
 const styles = StyleSheet.create({
-  container: {
-  },
+  container: {},
 })

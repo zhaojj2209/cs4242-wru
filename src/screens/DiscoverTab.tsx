@@ -17,8 +17,7 @@ const DiscoverTab = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    (async () => {
-      
+    ;(async () => {
       const { status } = await requestForegroundPermissionsAsync()
       if (status !== 'granted') {
         setLoading(false)

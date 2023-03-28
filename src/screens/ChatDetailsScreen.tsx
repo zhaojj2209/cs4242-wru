@@ -1,19 +1,20 @@
 import { Alert, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Appbar, Card, Divider, Text } from 'react-native-paper'
+import { ActivityIndicator, Appbar, Button, Card, Divider, Text } from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '../db/firebase'
+import { deleteDoc, doc, getDoc } from 'firebase/firestore'
+import { auth, db } from '../db/firebase'
 import { EventChat } from '../util/types'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ChatDetails'>
 
 const ChatDetailsScreen = ({ route, navigation }: Props) => {
   const { chatID } = route.params
-  const [details, setDetails] = useState<EventChat | null>(null)
+  const [details, setDetails] = useState<EventChat | undefined>(undefined)
   const [loading, setLoading] = useState(false)
+  const [isCreator, setIsCreator] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
@@ -31,6 +32,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
             id: chatID,
             ...data,
           } as EventChat)
+          setIsCreator(data.creator === auth.currentUser?.uid)
           setLoading(false)
         } else {
           Alert.alert('Error: Event does not exist!')
@@ -41,12 +43,44 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
     }, [])
   )
 
+  const handleDelete = () => {
+    if (!chatID) {
+      return
+    }
+    Alert.alert('Confirm delete?', 'All messages will be deleted!', [
+      {
+        text: 'OK',
+        onPress: () =>
+          deleteDoc(doc(db, 'chats', chatID))
+            .then(() =>
+              Alert.alert('Chat deleted!', '', [
+                {
+                  text: 'OK',
+                  onPress: () => navigation.replace('HomeTabs', {
+                    screen: 'ChatsTab'
+                  }),
+                },
+              ])
+            )
+            .catch((error) => Alert.alert(error)),
+      },
+      {
+        text: 'Cancel',
+      },
+    ])
+  }
+
   return (
     <View style={styles.container}>
       <Appbar.Header mode="center-aligned" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={`${details?.title ?? ''} Chat Details`} />
-        <Appbar.Action icon="square-edit-outline" onPress={() => {}} />
+        {isCreator && (
+          <Appbar.Action
+            icon="square-edit-outline"
+            onPress={() => navigation.navigate('EditChat', { chat: details })}
+          />
+        )}
       </Appbar.Header>
       {loading && <ActivityIndicator />}
       {!loading && (
@@ -74,6 +108,11 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
           <Card.Content></Card.Content>
         </Card>
       </View>
+      <View style={styles.delete}>
+        <Button mode="contained" buttonColor="red" onPress={handleDelete}>
+          Delete Chat
+        </Button>
+      </View>
     </View>
   )
 }
@@ -92,5 +131,9 @@ const styles = StyleSheet.create({
   },
   members: {
     marginTop: 20,
+  },
+  delete: {
+    margin: 10,
+    alignItems: 'center',
   },
 })

@@ -1,11 +1,14 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import HomeTabs from './HomeTabs'
+import HomeTabs, { HomeTabParamList } from './HomeTabs'
 import ChatScreen from './ChatScreen'
 import ChatDetailsScreen from './ChatDetailsScreen'
+import EditChatScreen from './EditChatScreen'
+import { EventChat } from '../util/types'
+import { NavigatorScreenParams } from '@react-navigation/native'
 
 export type HomeStackParamList = {
-  HomeTabs: undefined
+  HomeTabs: NavigatorScreenParams<HomeTabParamList>,
   Chat: {
     user?: string
     chatID?: string
@@ -15,6 +18,9 @@ export type HomeStackParamList = {
     user?: string
     chatID?: string
     title?: string
+  }
+  EditChat: {
+    chat?: EventChat
   }
 }
 
@@ -30,6 +36,7 @@ const HomeScreen = () => {
         name="ChatDetails"
         component={ChatDetailsScreen}
       />
+      <Stack.Screen options={{ headerShown: false }} name="EditChat" component={EditChatScreen} />
     </Stack.Navigator>
   )
 }

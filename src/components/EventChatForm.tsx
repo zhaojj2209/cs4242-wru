@@ -1,5 +1,5 @@
 import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Text, TextInput } from 'react-native-paper'
 import DatePicker from '../components/DatePicker'
 import { EventChat, EventChatFormParams } from '../util/types'
@@ -18,6 +18,15 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState(new Date())
   const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
+
+  useEffect(() => {
+    if (data) {
+      setTitle(data.title)
+      setDescription(data.description)
+      setStartDate(data.startDate.toDate())
+      setEndDate(data.endDate.toDate())
+    }
+  }, [data])
 
   const handleChangeStartDate = (date: Date) => {
     setStartDate(date)

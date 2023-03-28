@@ -1,11 +1,11 @@
+import { Timestamp } from 'firebase/firestore'
+
 export interface EventChat {
   id: string
   title: string
   description: string
-  date: {
-    nanoseconds: number
-    seconds: number
-  }
+  startDate: Timestamp
+  endDate: Timestamp
   creator: string
   members: string[]
 }

@@ -81,7 +81,12 @@ const ChatScreen = ({ route, navigation }: Props) => {
       <Appbar.Header mode="center-aligned" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={title} />
-        <Appbar.Action icon="dots-horizontal" onPress={() => {}} />
+        <Appbar.Action
+          icon="dots-horizontal"
+          onPress={() =>
+            navigation.navigate('ChatDetails', route.params)
+          }
+        />
       </Appbar.Header>
       <GiftedChat
         messages={messages}

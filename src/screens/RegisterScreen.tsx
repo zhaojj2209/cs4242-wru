@@ -82,6 +82,7 @@ const RegisterScreen = ({ navigation }: Props) => {
             value={password}
             onChangeText={setPassword}
             style={styles.input}
+            autoCapitalize="none"
             secureTextEntry
           />
           <TextInput
@@ -89,6 +90,7 @@ const RegisterScreen = ({ navigation }: Props) => {
             value={passwordRepeat}
             onChangeText={setPasswordRepeat}
             style={styles.input}
+            autoCapitalize="none"
             secureTextEntry
           />
           <TextInput

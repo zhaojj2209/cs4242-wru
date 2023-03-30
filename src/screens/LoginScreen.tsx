@@ -56,6 +56,7 @@ const LoginScreen = ({ navigation }: Props) => {
             value={password}
             onChangeText={setPassword}
             style={styles.input}
+            autoCapitalize="none"
             secureTextEntry
           />
         </View>

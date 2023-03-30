@@ -28,11 +28,6 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
 
   useFocusEffect(
     useCallback(() => {
-      if (!chatID) {
-        Alert.alert('Error: Event does not exist!')
-        navigation.goBack()
-        return
-      }
       setLoading(true)
       const docRef = doc(db, 'chats', chatID)
       getDoc(docRef).then((document) => {
@@ -43,10 +38,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
             ...data,
           } as EventChat)
           setIsCreator(data.creator === auth.currentUser?.uid)
-          const q = query(
-            collection(db, 'users'),
-            where('uid', 'in', data.members)
-          )
+          const q = query(collection(db, 'users'), where('uid', 'in', data.members))
           getDocs(q).then((docs) => {
             const members: User[] = []
             docs.forEach((doc) => {
@@ -65,10 +57,14 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
     }, [])
   )
 
-  const handleDelete = () => {
-    if (!chatID) {
+  const navigateEdit = () => {
+    if (!details) {
       return
     }
+    navigation.navigate('EditChat', { chat: details })
+  }
+
+  const handleDelete = () => {
     Alert.alert('Confirm delete?', 'All messages will be deleted!', [
       {
         text: 'OK',
@@ -98,16 +94,11 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       <Appbar.Header mode="center-aligned" elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={`${details?.title ?? ''} Chat Details`} />
-        {isCreator && (
-          <Appbar.Action
-            icon="square-edit-outline"
-            onPress={() => navigation.navigate('EditChat', { chat: details })}
-          />
-        )}
+        {isCreator && <Appbar.Action icon="square-edit-outline" onPress={navigateEdit} />}
       </Appbar.Header>
       {loading && <ActivityIndicator />}
       {!loading && (
-        <Card style={styles.details}>
+        <Card style={styles.details} mode="outlined">
           <Card.Content>
             <Text variant="titleMedium" style={styles.text}>
               Description: {details?.description}
@@ -128,16 +119,25 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       <View style={styles.details}>
         <View style={styles.memberHeader}>
           <Text variant="titleLarge">Members:</Text>
-          <Button>Add members</Button>
+          <Button
+            icon="plus"
+            onPress={() =>
+              navigation.navigate('AddMembers', { chatID, members: details?.members ?? [] })
+            }
+          >
+            Add members
+          </Button>
         </View>
-        <Card style={styles.members}>
+        <Card style={styles.members} mode="outlined">
           <Card.Content>
             <List.Section>
-              {members.map((member, idx) => (
+              {members.map((member) => (
                 <List.Item
-                  key={idx}
-                  title={member.displayName != "" ? member.displayName : member.email}
-                  left={(props) => <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />}
+                  key={member.uid}
+                  title={member.displayName.length > 0 ? member.displayName : member.email}
+                  left={(props) => (
+                    <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
+                  )}
                 />
               ))}
             </List.Section>

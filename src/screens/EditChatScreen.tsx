@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, View } from 'react-native'
 import React from 'react'
-import { Appbar, Text } from 'react-native-paper'
+import { Appbar } from 'react-native-paper'
 import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { doc, updateDoc } from 'firebase/firestore'
@@ -13,10 +13,6 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'EditChat'>
 const EditChatScreen = ({ route, navigation }: Props) => {
   const { chat } = route.params
   const handleEditChat = (data: EventChatFormParams) => {
-    if (!chat) {
-      Alert.alert('Error: Chat does not exist!')
-      return
-    }
     const docRef = doc(db, 'chats', chat.id)
     updateDoc(docRef, {
       ...data,
@@ -38,8 +34,7 @@ const EditChatScreen = ({ route, navigation }: Props) => {
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Edit Chat" />
       </Appbar.Header>
-      {!chat && <Text>Chat does not exist!</Text>}
-      {chat && <EventChatForm navigation={navigation} onSubmit={handleEditChat} data={chat} />}
+      <EventChatForm navigation={navigation} onSubmit={handleEditChat} data={chat} />
     </View>
   )
 }

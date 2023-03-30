@@ -42,6 +42,17 @@ const ChatsScreen = ({ navigation }: Props) => {
     }, [])
   )
 
+  const navigateChat = (chat: EventChat) => {
+    if (!auth.currentUser) {
+      return
+    }
+    navigation.navigate('Chat', {
+      user: auth.currentUser.uid,
+      chatID: chat.id,
+      title: chat.title,
+    })
+  }
+
   return (
     <View style={styles.container}>
       <Appbar.Header mode="center-aligned" elevated>
@@ -59,13 +70,7 @@ const ChatsScreen = ({ navigation }: Props) => {
             title={chat.title}
             description={chat.description}
             left={(props) => <List.Icon {...props} icon="chat" />}
-            onPress={() =>
-              navigation.navigate('Chat', {
-                user: auth?.currentUser?.uid,
-                chatID: chat.id,
-                title: chat.title,
-              })
-            }
+            onPress={() => navigateChat(chat)}
           />
         ))}
       </List.Section>

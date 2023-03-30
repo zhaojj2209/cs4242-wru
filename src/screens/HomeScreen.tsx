@@ -6,21 +6,26 @@ import ChatDetailsScreen from './ChatDetailsScreen'
 import EditChatScreen from './EditChatScreen'
 import { EventChat } from '../util/types'
 import { NavigatorScreenParams } from '@react-navigation/native'
+import AddMembersScreen from './AddMembersScreen'
 
 export type HomeStackParamList = {
   HomeTabs: NavigatorScreenParams<HomeTabParamList>
   Chat: {
-    user?: string
-    chatID?: string
-    title?: string
+    user: string
+    chatID: string
+    title: string
   }
   ChatDetails: {
-    user?: string
-    chatID?: string
-    title?: string
+    user: string
+    chatID: string
+    title: string
   }
   EditChat: {
-    chat?: EventChat
+    chat: EventChat
+  }
+  AddMembers: {
+    chatID: string
+    members: string[]
   }
 }
 
@@ -37,6 +42,7 @@ const HomeScreen = () => {
         component={ChatDetailsScreen}
       />
       <Stack.Screen options={{ headerShown: false }} name="EditChat" component={EditChatScreen} />
+      <Stack.Screen options={{ headerShown: false }} name="AddMembers" component={AddMembersScreen} />
     </Stack.Navigator>
   )
 }

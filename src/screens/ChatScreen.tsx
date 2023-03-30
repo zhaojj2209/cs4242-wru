@@ -17,10 +17,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
   const [messages, setMessages] = useState<Message[]>([])
 
   useLayoutEffect(() => {
-    const q = query(
-      collection(db, 'chats', chatID ? chatID : 'err', 'messages'),
-      orderBy('createdAt', 'desc')
-    )
+    const q = query(collection(db, 'chats', chatID, 'messages'), orderBy('createdAt', 'desc'))
     const unsubscribe = onSnapshot(q, (snapshot) =>
       setMessages(
         snapshot.docs.map((doc) => ({
@@ -41,7 +38,7 @@ const ChatScreen = ({ route, navigation }: Props) => {
     setMessages((previousMessages) => GiftedChat.append(previousMessages, messages))
 
     const { _id, createdAt, text, user } = messages[0]
-    addDoc(collection(db, 'chats', chatID ?? 'err', 'messages'), { _id, createdAt, text, user })
+    addDoc(collection(db, 'chats', chatID, 'messages'), { _id, createdAt, text, user })
   }, [])
 
   const renderBubble = (props: any) => {

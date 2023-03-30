@@ -136,7 +136,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
               {members.map((member, idx) => (
                 <List.Item
                   key={idx}
-                  title={member.displayName ?? member.email}
+                  title={member.displayName != "" ? member.displayName : member.email}
                   left={(props) => <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />}
                 />
               ))}

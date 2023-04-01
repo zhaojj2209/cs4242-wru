@@ -43,10 +43,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
             ...data,
           } as EventChat)
           setIsCreator(data.creator === auth.currentUser?.uid)
-          const q = query(
-            collection(db, 'users'),
-            where('uid', 'in', data.members)
-          )
+          const q = query(collection(db, 'users'), where('uid', 'in', data.members))
           getDocs(q).then((docs) => {
             const members: User[] = []
             docs.forEach((doc) => {
@@ -136,8 +133,10 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
               {members.map((member, idx) => (
                 <List.Item
                   key={idx}
-                  title={member.displayName != "" ? member.displayName : member.email}
-                  left={(props) => <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />}
+                  title={member.displayName != '' ? member.displayName : member.email}
+                  left={(props) => (
+                    <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
+                  )}
                 />
               ))}
             </List.Section>

@@ -15,6 +15,7 @@ export interface EventChat {
   endDate: Timestamp
   creator: string
   members: string[]
+  location: LocationData
 }
 
 export interface Message {
@@ -35,4 +36,11 @@ export interface EventChatFormParams {
   endDate: Date
   creator: string
   members: string[]
+  location: LocationData
+}
+
+export interface LocationData {
+  placeId: string
+  description: string
+  location: any
 }

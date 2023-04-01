@@ -39,6 +39,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
           } as EventChat)
           setIsCreator(data.creator === auth.currentUser?.uid)
           const q = query(collection(db, 'users'), where('uid', 'in', data.members))
+          const q = query(collection(db, 'users'), where('uid', 'in', data.members))
           getDocs(q).then((docs) => {
             const members: User[] = []
             docs.forEach((doc) => {

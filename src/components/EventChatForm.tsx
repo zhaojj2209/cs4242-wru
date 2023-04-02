@@ -34,7 +34,11 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
 
   const [modalVisible, setModalVisible] = useState(false)
   const [query, setQuery] = useState('')
-  const [location, setLocation] = useState<LocationData>({placeId: '', description: '', location: undefined})
+  const [location, setLocation] = useState<LocationData>({
+    placeId: '',
+    description: '',
+    location: undefined,
+  })
 
   useEffect(() => {
     if (data) {
@@ -66,7 +70,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         endDate,
         creator: auth.currentUser.uid,
         members: [auth.currentUser.uid],
-        location
+        location,
       }
       onSubmit(data)
     } else {
@@ -76,14 +80,14 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         description,
         startDate,
         endDate,
-        location
+        location,
       }
       onSubmit(newData)
     }
   }
 
   const testmap = () => {
-    var config = {
+    const config = {
       method: 'get',
       url: 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum%20of%20Contemporary%20Art%20Australia&inputtype=textquery&fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry&key=AIzaSyCDjmy606TvoOLTa6apk2uYtdX-sX4dI1w',
       headers: {},
@@ -149,18 +153,22 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
           >
             <Text style={styles.modalHeader}>Search Location</Text>
             <GooglePlacesAutocomplete
-              placeholder='Type a place...'
-              query={{key: key}}
+              placeholder="Type a place..."
+              query={{ key: key }}
               fetchDetails={true}
               debounce={100}
               onPress={(data, details = null) => {
-                setLocation({placeId: data.place_id, description: data.description, location: details?.geometry.location})
+                setLocation({
+                  placeId: data.place_id,
+                  description: data.description,
+                  location: details?.geometry.location,
+                })
                 setModalVisible(false)
               }}
-              onFail={error => console.log(error)}
+              onFail={(error) => console.log(error)}
               onNotFound={() => console.log('no results')}
               listEmptyComponent={() => (
-                <View style={{flex: 1}}>
+                <View style={{ flex: 1 }}>
                   <Text>No results were found</Text>
                 </View>
               )}
@@ -172,9 +180,15 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
                 },
               }}
             />
-            <Button mode='contained' onPress={() => {setModalVisible(false)}}>Cancel</Button>
+            <Button
+              mode="contained"
+              onPress={() => {
+                setModalVisible(false)
+              }}
+            >
+              Cancel
+            </Button>
             {/* <Button mode="outlined" onPress={() => testmap()}>Test</Button> */}
-            
           </Modal>
         </Portal>
       </View>

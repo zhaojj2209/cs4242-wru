@@ -42,7 +42,11 @@ const HomeScreen = () => {
         component={ChatDetailsScreen}
       />
       <Stack.Screen options={{ headerShown: false }} name="EditChat" component={EditChatScreen} />
-      <Stack.Screen options={{ headerShown: false }} name="AddMembers" component={AddMembersScreen} />
+      <Stack.Screen
+        options={{ headerShown: false }}
+        name="AddMembers"
+        component={AddMembersScreen}
+      />
     </Stack.Navigator>
   )
 }

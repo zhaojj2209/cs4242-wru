@@ -1,20 +1,9 @@
-import { Alert, StyleSheet, View } from 'react-native'
+import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Appbar,
-  Avatar,
-  Checkbox,
-  List,
-} from 'react-native-paper'
+import { ActivityIndicator, Appbar, Avatar, Checkbox, List, Searchbar } from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import {
-  collection,
-  doc,
-  getDocs,
-  updateDoc,
-} from 'firebase/firestore'
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'
 import { db } from '../db/firebase'
 import { User } from '../util/types'
 
@@ -27,6 +16,8 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [checkboxMap, setCheckboxMap] = useState<CheckboxMap>({})
+  const [searchedUsers, setSearchedUsers] = useState<User[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
 
   const updateMap = (uid: string) => {
     setCheckboxMap({
@@ -53,6 +44,21 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
     })
   }, [])
 
+  useEffect(() => {
+    if (searchQuery.length === 0) {
+      return
+    }
+    const usersToDisplay: User[] = []
+    users.forEach((user) => {
+      if (user.displayName.toLowerCase().includes(searchQuery.toLowerCase())) {
+        usersToDisplay.push(user)
+      } else if (user.email.toLowerCase().includes(searchQuery.toLowerCase())) {
+        usersToDisplay.push(user)
+      }
+    })
+    setSearchedUsers(usersToDisplay)
+  }, [searchQuery])
+
   const handleConfirm = () => {
     const usersToAdd: string[] = []
     Object.keys(checkboxMap).forEach((key) => {
@@ -69,7 +75,7 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
         text: 'OK',
         onPress: () =>
           updateDoc(doc(db, 'chats', chatID), {
-            members: members.concat(usersToAdd)
+            members: members.concat(usersToAdd),
           })
             .then(() =>
               Alert.alert('Members added!', '', [
@@ -88,22 +94,27 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
   }
 
   return (
-    <View style={styles.container}>
-      <Appbar.Header mode="center-aligned" elevated>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Add Members" />
-        <Appbar.Action icon="check" onPress={handleConfirm} />
-      </Appbar.Header>
-      {loading && <ActivityIndicator />}
-      {!loading && (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Appbar.Header mode="center-aligned" elevated>
+          <Appbar.BackAction onPress={() => navigation.goBack()} />
+          <Appbar.Content title="Add Members" />
+          <Appbar.Action icon="check" onPress={handleConfirm} />
+        </Appbar.Header>
+        <Searchbar
+          placeholder="Search"
+          mode="view"
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+        />
+        {loading && <ActivityIndicator />}
         <List.Section>
-          {users.map((user) => (
+          {searchedUsers.map((user) => (
             <List.Item
               key={user.uid}
               title={user.displayName.length > 0 ? user.displayName : user.email}
-              left={(props) => (
-                <Avatar.Image {...props} size={48} source={{ uri: user.photoURL }} />
-              )}
+              description={user.displayName.length > 0 ? user.email : ''}
+              left={(props) => <Avatar.Image {...props} size={48} source={{ uri: user.photoURL }} />}
               right={(props) => (
                 <Checkbox
                   {...props}
@@ -115,8 +126,8 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
             />
           ))}
         </List.Section>
-      )}
-    </View>
+      </View>
+    </TouchableWithoutFeedback>
   )
 }
 

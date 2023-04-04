@@ -13,7 +13,16 @@ import {
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
-import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat, User } from '../util/types'
 
@@ -89,6 +98,34 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
     ])
   }
 
+  const handleLeave = () => {
+    if (!details || !auth.currentUser) {
+      return
+    }
+    Alert.alert('Confirm leave?', '', [
+      {
+        text: 'OK',
+        onPress: () => {
+          // splicing returns new array containing removed elements;
+          // original array has the elements removed
+          details.members.splice(details.members.indexOf(auth.currentUser?.uid ?? ''), 1)
+          updateDoc(doc(db, 'chats', chatID), {
+            members: details.members,
+          })
+            .then(() =>
+              navigation.replace('HomeTabs', {
+                screen: 'ChatsTab',
+              })
+            )
+            .catch((error) => Alert.alert(error))
+        },
+      },
+      {
+        text: 'Cancel',
+      },
+    ])
+  }
+
   return (
     <View style={styles.container}>
       <Appbar.Header mode="center-aligned" elevated>
@@ -144,13 +181,17 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
           </Card.Content>
         </Card>
       </View>
-      {isCreator && (
-        <View style={styles.delete}>
+      <View style={styles.buttons}>
+        {isCreator ? (
           <Button mode="contained" buttonColor="red" onPress={handleDelete}>
             Delete Chat
           </Button>
-        </View>
-      )}
+        ) : (
+          <Button mode="contained" buttonColor="red" onPress={handleLeave}>
+            Leave Chat
+          </Button>
+        )}
+      </View>
     </View>
   )
 }
@@ -175,7 +216,7 @@ const styles = StyleSheet.create({
   members: {
     marginTop: 20,
   },
-  delete: {
+  buttons: {
     margin: 10,
     alignItems: 'center',
   },

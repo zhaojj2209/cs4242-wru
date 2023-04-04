@@ -114,7 +114,9 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
               key={user.uid}
               title={user.displayName.length > 0 ? user.displayName : user.email}
               description={user.displayName.length > 0 ? user.email : ''}
-              left={(props) => <Avatar.Image {...props} size={48} source={{ uri: user.photoURL }} />}
+              left={(props) => (
+                <Avatar.Image {...props} size={48} source={{ uri: user.photoURL }} />
+              )}
               right={(props) => (
                 <Checkbox
                   {...props}

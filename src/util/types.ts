@@ -42,5 +42,8 @@ export interface EventChatFormParams {
 export interface LocationData {
   placeId: string
   description: string
-  location: any
+  location: {
+    lat: number
+    lng: number
+  }
 }

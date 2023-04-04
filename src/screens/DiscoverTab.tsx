@@ -1,8 +1,11 @@
 import { StyleSheet, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import MapView from 'react-native-maps'
+import MapView, { Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
 import { ActivityIndicator } from 'react-native-paper'
+import { EventChat } from '../util/types'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../db/firebase'
 
 const DiscoverTab = () => {
   const sgCoords = {
@@ -15,6 +18,7 @@ const DiscoverTab = () => {
   }
   const [coords, setCoords] = useState(sgCoords)
   const [loading, setLoading] = useState(true)
+  const [events, setEvents] = useState<EventChat[]>([])
 
   useEffect(() => {
     ;(async () => {
@@ -35,6 +39,17 @@ const DiscoverTab = () => {
     })()
   }, [])
 
+  useEffect(() => {
+    getDocs(collection(db, 'chats')).then((docs) => {
+      const events: EventChat[] = []
+      docs.forEach((doc) => {
+        const data = doc.data() as EventChat
+        events.push(data)
+      })
+      setEvents(events)
+    })
+  }, [])
+
   return (
     <View style={styles.container}>
       {loading ? (
@@ -46,7 +61,19 @@ const DiscoverTab = () => {
           initialRegion={coords}
           showsUserLocation
           loadingEnabled
-        />
+        >
+          {events.map((event, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: event.location.location.lat,
+                longitude: event.location.location.lng,
+              }}
+              title={event.title}
+              description={event.description}
+            />
+          ))}
+        </MapView>
       )}
     </View>
   )

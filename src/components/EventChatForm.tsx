@@ -1,20 +1,20 @@
 import {
   Alert,
   Keyboard,
+  ScrollView,
   StyleSheet,
   TouchableHighlight,
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Button, List, Modal, Portal, Provider, Text, TextInput } from 'react-native-paper'
+import { Button, List, Modal, Portal, Text, TextInput } from 'react-native-paper'
 import DatePicker from '../components/DatePicker'
 import { EventChat, EventChatFormParams, LocationData } from '../util/types'
 import { auth } from '../db/firebase'
-import MapView from 'react-native-maps'
 
-import axios from 'axios'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
+import SmallMapWithMarker from './SmallMapWithMarker'
 
 export interface EventChatFormProps {
   navigation: any
@@ -33,11 +33,10 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
 
   const [modalVisible, setModalVisible] = useState(false)
-  const [query, setQuery] = useState('')
   const [location, setLocation] = useState<LocationData>({
     placeId: '',
     description: '',
-    location: undefined,
+    location: { lat: 0, lng: 0 },
   })
 
   useEffect(() => {
@@ -86,25 +85,9 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
     }
   }
 
-  const testmap = () => {
-    const config = {
-      method: 'get',
-      url: 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=Museum%20of%20Contemporary%20Art%20Australia&inputtype=textquery&fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry&key=AIzaSyCDjmy606TvoOLTa6apk2uYtdX-sX4dI1w',
-      headers: {},
-    }
-
-    axios(config)
-      .then((response: { data: any }) => {
-        console.log(JSON.stringify(response.data))
-      })
-      .catch((error: any) => {
-        console.log(error)
-      })
-  }
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.inputContainer}>
           <TextInput
             placeholder="Title"
@@ -124,10 +107,22 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
           </Text>
           <TouchableHighlight underlayColor="#DDDDDD" onPress={() => setModalVisible(true)}>
             <List.Item
-              title="Add Location"
+              title={
+                location.location.lat !== 0 && location.location.lng !== 0
+                  ? 'Change Location'
+                  : 'Add Location'
+              }
               left={(props) => <List.Icon {...props} icon="map-marker" />}
             />
           </TouchableHighlight>
+          {location.location.lat !== 0 && location.location.lng !== 0 && (
+            <View>
+              <Text variant="bodyLarge" style={styles.dateLabel}>
+                Selected: {location.description}
+              </Text>
+              <SmallMapWithMarker location={location} />
+            </View>
+          )}
           <Text variant="bodyLarge" style={styles.dateLabel}>
             Event start date:
           </Text>
@@ -157,11 +152,11 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
               query={{ key: key }}
               fetchDetails={true}
               debounce={100}
-              onPress={(data, details = null) => {
+              onPress={(data, details) => {
                 setLocation({
                   placeId: data.place_id,
                   description: data.description,
-                  location: details?.geometry.location,
+                  location: details?.geometry.location ?? { lat: 0, lng: 0 },
                 })
                 setModalVisible(false)
               }}
@@ -188,10 +183,9 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
             >
               Cancel
             </Button>
-            {/* <Button mode="outlined" onPress={() => testmap()}>Test</Button> */}
           </Modal>
         </Portal>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   )
 }

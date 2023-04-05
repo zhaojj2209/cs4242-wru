@@ -25,7 +25,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat, User } from '../util/types'
-import MapView, { Marker } from 'react-native-maps'
+import SmallMapWithMarker from '../components/SmallMapWithMarker'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ChatDetails'>
 
@@ -156,27 +156,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
               <Text variant="titleMedium" style={styles.text}>
                 Location: {details?.location.description}
               </Text>
-              {details?.location.location && (
-                <MapView
-                  provider="google"
-                  style={styles.map}
-                  initialRegion={{
-                    latitude: details.location.location.lat,
-                    longitude: details.location.location.lng,
-                    latitudeDelta: 0.001,
-                    longitudeDelta: 0.001,
-                  }}
-                  showsUserLocation
-                  loadingEnabled
-                >
-                  <Marker
-                    coordinate={{
-                      latitude: details.location.location.lat,
-                      longitude: details.location.location.lng,
-                    }}
-                  />
-                </MapView>
-              )}
+              {details?.location && <SmallMapWithMarker location={details.location} />}
             </Card.Content>
           </Card>
         )}
@@ -247,9 +227,5 @@ const styles = StyleSheet.create({
   buttons: {
     margin: 10,
     alignItems: 'center',
-  },
-  map: {
-    width: '100%',
-    height: 150,
   },
 })

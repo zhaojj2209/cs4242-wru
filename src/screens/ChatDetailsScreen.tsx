@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
 import {
   ActivityIndicator,
@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat, User } from '../util/types'
+import MapView, { Marker } from 'react-native-maps'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ChatDetails'>
 
@@ -133,65 +134,92 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
         <Appbar.Content title={`${details?.title ?? ''} Chat Details`} />
         {isCreator && <Appbar.Action icon="square-edit-outline" onPress={navigateEdit} />}
       </Appbar.Header>
-      {loading && <ActivityIndicator />}
-      {!loading && (
-        <Card style={styles.details} mode="outlined">
-          <Card.Content>
-            <Text variant="titleMedium" style={styles.text}>
-              Description: {details?.description}
-            </Text>
-            <Divider />
-            <Text variant="titleMedium" style={styles.text}>
-              Start date: {details?.startDate.toDate().toLocaleDateString()}{' '}
-              {details?.startDate.toDate().toLocaleTimeString()}
-            </Text>
-            <Divider />
-            <Text variant="titleMedium" style={styles.text}>
-              End date: {details?.endDate.toDate().toLocaleDateString()}{' '}
-              {details?.endDate.toDate().toLocaleTimeString()}
-            </Text>
-          </Card.Content>
-        </Card>
-      )}
-      <View style={styles.details}>
-        <View style={styles.memberHeader}>
-          <Text variant="titleLarge">Members:</Text>
-          <Button
-            icon="plus"
-            onPress={() =>
-              navigation.navigate('AddMembers', { chatID, members: details?.members ?? [] })
-            }
-          >
-            Add members
-          </Button>
-        </View>
-        <Card style={styles.members} mode="outlined">
-          <Card.Content>
-            <List.Section>
-              {members.map((member) => (
-                <List.Item
-                  key={member.uid}
-                  title={member.displayName.length > 0 ? member.displayName : member.email}
-                  left={(props) => (
-                    <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
-                  )}
-                />
-              ))}
-            </List.Section>
-          </Card.Content>
-        </Card>
-      </View>
-      <View style={styles.buttons}>
-        {isCreator ? (
-          <Button mode="contained" buttonColor="red" onPress={handleDelete}>
-            Delete Chat
-          </Button>
-        ) : (
-          <Button mode="contained" buttonColor="red" onPress={handleLeave}>
-            Leave Chat
-          </Button>
+      <ScrollView>
+        {loading && <ActivityIndicator />}
+        {!loading && (
+          <Card style={styles.details} mode="outlined">
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.text}>
+                Description: {details?.description}
+              </Text>
+              <Divider />
+              <Text variant="titleMedium" style={styles.text}>
+                Start date: {details?.startDate.toDate().toLocaleDateString()}{' '}
+                {details?.startDate.toDate().toLocaleTimeString()}
+              </Text>
+              <Divider />
+              <Text variant="titleMedium" style={styles.text}>
+                End date: {details?.endDate.toDate().toLocaleDateString()}{' '}
+                {details?.endDate.toDate().toLocaleTimeString()}
+              </Text>
+              <Divider />
+              <Text variant="titleMedium" style={styles.text}>
+                Location: {details?.location.description}
+              </Text>
+              {details?.location.location && (
+                <MapView
+                  provider="google"
+                  style={styles.map}
+                  initialRegion={{
+                    latitude: details.location.location.lat,
+                    longitude: details.location.location.lng,
+                    latitudeDelta: 0.001,
+                    longitudeDelta: 0.001,
+                  }}
+                  showsUserLocation
+                  loadingEnabled
+                >
+                  <Marker
+                    coordinate={{
+                      latitude: details.location.location.lat,
+                      longitude: details.location.location.lng,
+                    }}
+                  />
+                </MapView>
+              )}
+            </Card.Content>
+          </Card>
         )}
-      </View>
+        <View style={styles.details}>
+          <View style={styles.memberHeader}>
+            <Text variant="titleLarge">Members:</Text>
+            <Button
+              icon="plus"
+              onPress={() =>
+                navigation.navigate('AddMembers', { chatID, members: details?.members ?? [] })
+              }
+            >
+              Add members
+            </Button>
+          </View>
+          <Card style={styles.members} mode="outlined">
+            <Card.Content>
+              <List.Section>
+                {members.map((member) => (
+                  <List.Item
+                    key={member.uid}
+                    title={member.displayName.length > 0 ? member.displayName : member.email}
+                    left={(props) => (
+                      <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
+                    )}
+                  />
+                ))}
+              </List.Section>
+            </Card.Content>
+          </Card>
+        </View>
+        <View style={styles.buttons}>
+          {isCreator ? (
+            <Button mode="contained" buttonColor="red" onPress={handleDelete}>
+              Delete Chat
+            </Button>
+          ) : (
+            <Button mode="contained" buttonColor="red" onPress={handleLeave}>
+              Leave Chat
+            </Button>
+          )}
+        </View>
+      </ScrollView>
     </View>
   )
 }
@@ -203,7 +231,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   details: {
-    margin: 20,
+    margin: 10,
   },
   text: {
     paddingVertical: 10,
@@ -219,5 +247,9 @@ const styles = StyleSheet.create({
   buttons: {
     margin: 10,
     alignItems: 'center',
+  },
+  map: {
+    width: '100%',
+    height: 150,
   },
 })

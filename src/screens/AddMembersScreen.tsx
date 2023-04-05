@@ -46,6 +46,7 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
 
   useEffect(() => {
     if (searchQuery.length === 0) {
+      setSearchedUsers([])
       return
     }
     const usersToDisplay: User[] = []

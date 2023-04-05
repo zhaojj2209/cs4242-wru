@@ -1,8 +1,8 @@
-import { StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
-import { ActivityIndicator, Text } from 'react-native-paper'
+import { ActivityIndicator, Button, FAB, List, Modal, Portal, Searchbar, Text } from 'react-native-paper'
 import { EventChat } from '../util/types'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../db/firebase'
@@ -23,6 +23,9 @@ const MapScreen = ({ navigation }: Props) => {
   const [coords, setCoords] = useState(sgCoords)
   const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState<EventChat[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchedEvents, setSearchedEvents] = useState<EventChat[]>([])
+  const [modalVisible, setModalVisible] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -56,6 +59,31 @@ const MapScreen = ({ navigation }: Props) => {
       setEvents(events)
     })
   }, [])
+
+  useEffect(() => {
+    if (searchQuery.length === 0) {
+      setSearchedEvents([])
+      return
+    }
+    const eventsToDisplay: EventChat[] = []
+    events.forEach((event) => {
+      if (event.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+        eventsToDisplay.push(event)
+      } else if (event.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+        eventsToDisplay.push(event)
+      } else if (event.location.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+        eventsToDisplay.push(event)
+      } else {
+        for (const tag in event.tags) {
+          if (tag.toLowerCase().includes(searchQuery.toLowerCase())) {
+            eventsToDisplay.push(event)
+            break
+          }
+        }
+      }
+    })
+    setSearchedEvents(eventsToDisplay)
+  }, [searchQuery])
 
   return (
     <View style={styles.container}>
@@ -96,6 +124,49 @@ const MapScreen = ({ navigation }: Props) => {
           ))}
         </MapView>
       )}
+      <FAB
+        icon="magnify"
+        mode="flat"
+        style={styles.fab}
+        onPress={() => setModalVisible(true)}
+      />
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <Searchbar
+            placeholder="Search events..."
+            onChangeText={(query) => setSearchQuery(query)}
+            value={searchQuery}
+          />
+          <ScrollView>
+          <List.Section>
+          {searchedEvents.map((event) => (
+            <List.Item
+              key={event.id}
+              title={event.title}
+              description={event.description}
+              onPress={() => {
+                setSearchQuery('')
+                setModalVisible(false)
+                navigation.navigate('EventDetails', { event })
+              }}
+            />
+          ))}
+        </List.Section>
+          </ScrollView>
+          <Button
+            mode="contained"
+            onPress={() => {
+              setModalVisible(false)
+            }}
+          >
+            Cancel
+          </Button>
+        </Modal>
+      </Portal>
     </View>
   )
 }
@@ -111,5 +182,24 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    height: '90%',
+    alignContent: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+  },
+  modalHeader: {
+    textAlign: 'center',
+    margin: 5,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    top: 50,
   },
 })

@@ -8,7 +8,17 @@ import {
   View,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Button, Chip, List, Modal, Portal, Switch, Text, TextInput, useTheme } from 'react-native-paper'
+import {
+  Button,
+  Chip,
+  List,
+  Modal,
+  Portal,
+  Switch,
+  Text,
+  TextInput,
+  useTheme,
+} from 'react-native-paper'
 import DatePicker from '../components/DatePicker'
 import { EventChat, EventChatFormParams, LocationData } from '../util/types'
 import { auth } from '../db/firebase'
@@ -153,13 +163,15 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
           <Tags
             initialText=""
             textInputProps={{
-              placeholder: 'Keywords to describe the event'
+              placeholder: 'Keywords to describe the event',
             }}
             initialTags={tags}
-            onChangeTags={tags => setTags(tags)}
+            onChangeTags={(tags) => setTags(tags)}
             inputStyle={{ backgroundColor: theme.colors.background }}
             renderTag={({ tag, index, onPress, deleteTagOnPress, readonly }) => (
-              <Chip key={`${tag}-${index}`} onPress={onPress}>{tag}</Chip>
+              <Chip key={`${tag}-${index}`} onPress={onPress}>
+                {tag}
+              </Chip>
             )}
           />
           <View style={styles.switchContainer}>
@@ -272,5 +284,5 @@ const styles = StyleSheet.create({
   switch: {
     marginLeft: 10,
     marginTop: 10,
-  }
+  },
 })

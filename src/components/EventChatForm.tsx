@@ -8,13 +8,14 @@ import {
   View,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Button, List, Modal, Portal, Switch, Text, TextInput } from 'react-native-paper'
+import { Button, Chip, List, Modal, Portal, Switch, Text, TextInput, useTheme } from 'react-native-paper'
 import DatePicker from '../components/DatePicker'
 import { EventChat, EventChatFormParams, LocationData } from '../util/types'
 import { auth } from '../db/firebase'
 
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import SmallMapWithMarker from './SmallMapWithMarker'
+import Tags from 'react-native-tags'
 
 export interface EventChatFormProps {
   navigation: any
@@ -35,6 +36,9 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const [startDate, setStartDate] = useState(now)
   const [endDate, setEndDate] = useState(new Date(now.getTime() + ONE_HOUR_IN_MILLISECONDS))
   const [isPublic, setIsPublic] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+
+  const theme = useTheme()
 
   const onToggleSwitch = () => setIsPublic(!isPublic)
 
@@ -53,6 +57,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
       setEndDate(data.endDate.toDate())
       setLocation(data.location)
       setIsPublic(data.isPublic)
+      setTags(data.tags)
     }
   }, [data])
 
@@ -78,6 +83,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         members: [auth.currentUser.uid],
         location,
         isPublic,
+        tags,
       }
       onSubmit(data)
     } else {
@@ -89,6 +95,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         endDate,
         location,
         isPublic,
+        tags,
       }
       onSubmit(newData)
     }
@@ -140,6 +147,21 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
             Event end date:
           </Text>
           <DatePicker date={endDate} onChangeCallback={setEndDate} />
+          <Text variant="bodyLarge" style={styles.dateLabel}>
+            Tags (optional):
+          </Text>
+          <Tags
+            initialText=""
+            textInputProps={{
+              placeholder: 'Keywords to describe the event'
+            }}
+            initialTags={tags}
+            onChangeTags={tags => setTags(tags)}
+            inputStyle={{ backgroundColor: theme.colors.background }}
+            renderTag={({ tag, index, onPress, deleteTagOnPress, readonly }) => (
+              <Chip key={`${tag}-${index}`} onPress={onPress}>{tag}</Chip>
+            )}
+          />
           <View style={styles.switchContainer}>
             <Text variant="bodyLarge" style={styles.dateLabel}>
               Set event as public
@@ -245,7 +267,7 @@ const styles = StyleSheet.create({
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingTop: 10,
   },
   switch: {
     marginLeft: 10,

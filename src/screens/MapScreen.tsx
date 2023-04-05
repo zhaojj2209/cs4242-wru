@@ -4,7 +4,7 @@ import MapView, { Callout, Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
 import { ActivityIndicator, Text } from 'react-native-paper'
 import { EventChat } from '../util/types'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { DiscoverStackParamList } from './DiscoverTab'
@@ -44,7 +44,8 @@ const MapScreen = ({ navigation }: Props) => {
   }, [])
 
   useEffect(() => {
-    getDocs(collection(db, 'chats')).then((docs) => {
+    const q = query(collection(db, 'chats'), where('isPublic', '==', true))
+    getDocs(q).then((docs) => {
       const events: EventChat[] = []
       docs.forEach((doc) => {
         events.push({

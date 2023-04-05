@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Button, List, Modal, Portal, Text, TextInput } from 'react-native-paper'
+import { Button, List, Modal, Portal, Switch, Text, TextInput } from 'react-native-paper'
 import DatePicker from '../components/DatePicker'
 import { EventChat, EventChatFormParams, LocationData } from '../util/types'
 import { auth } from '../db/firebase'
@@ -34,6 +34,9 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const [description, setDescription] = useState('')
   const [startDate, setStartDate] = useState(now)
   const [endDate, setEndDate] = useState(new Date(now.getTime() + ONE_HOUR_IN_MILLISECONDS))
+  const [isPublic, setIsPublic] = useState(false)
+
+  const onToggleSwitch = () => setIsPublic(!isPublic)
 
   const [modalVisible, setModalVisible] = useState(false)
   const [location, setLocation] = useState<LocationData>({
@@ -49,6 +52,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
       setStartDate(data.startDate.toDate())
       setEndDate(data.endDate.toDate())
       setLocation(data.location)
+      setIsPublic(data.isPublic)
     }
   }, [data])
 
@@ -73,6 +77,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         creator: auth.currentUser.uid,
         members: [auth.currentUser.uid],
         location,
+        isPublic,
       }
       onSubmit(data)
     } else {
@@ -83,6 +88,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         startDate,
         endDate,
         location,
+        isPublic,
       }
       onSubmit(newData)
     }
@@ -134,6 +140,12 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
             Event end date:
           </Text>
           <DatePicker date={endDate} onChangeCallback={setEndDate} />
+          <View style={styles.switchContainer}>
+            <Text variant="bodyLarge" style={styles.dateLabel}>
+              Set event as public
+            </Text>
+            <Switch style={styles.switch} value={isPublic} onValueChange={onToggleSwitch} />
+          </View>
         </View>
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleSubmit} style={styles.button}>
@@ -230,4 +242,13 @@ const styles = StyleSheet.create({
   button: {
     margin: 5,
   },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  switch: {
+    marginLeft: 10,
+    marginTop: 10,
+  }
 })

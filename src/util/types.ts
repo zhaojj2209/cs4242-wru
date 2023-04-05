@@ -16,6 +16,7 @@ export interface EventChat {
   creator: string
   members: string[]
   location: LocationData
+  isPublic: boolean
 }
 
 export interface Message {

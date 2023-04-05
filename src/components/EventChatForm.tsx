@@ -27,10 +27,13 @@ const key = 'AIzaSyCDjmy606TvoOLTa6apk2uYtdX-sX4dI1w'
 const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const ONE_HOUR_IN_MILLISECONDS = 3600 * 1000
 
+  const now = new Date()
+  now.setMinutes(0)
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [startDate, setStartDate] = useState(new Date())
-  const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
+  const [startDate, setStartDate] = useState(now)
+  const [endDate, setEndDate] = useState(new Date(now.getTime() + ONE_HOUR_IN_MILLISECONDS))
 
   const [modalVisible, setModalVisible] = useState(false)
   const [location, setLocation] = useState<LocationData>({
@@ -149,7 +152,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
             <Text style={styles.modalHeader}>Search Location</Text>
             <GooglePlacesAutocomplete
               placeholder="Type a place..."
-              query={{ key: key }}
+              query={{ key }}
               fetchDetails={true}
               debounce={100}
               onPress={(data, details) => {

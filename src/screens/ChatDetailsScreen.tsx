@@ -1,15 +1,6 @@
 import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import {
-  ActivityIndicator,
-  Appbar,
-  Avatar,
-  Button,
-  Card,
-  Divider,
-  List,
-  Text,
-} from 'react-native-paper'
+import { ActivityIndicator, Appbar, Avatar, Button, Card, List, Text } from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
@@ -25,7 +16,7 @@ import {
 } from 'firebase/firestore'
 import { auth, db } from '../db/firebase'
 import { EventChat, User } from '../util/types'
-import SmallMapWithMarker from '../components/SmallMapWithMarker'
+import EventDetailsCard from '../components/EventDetailsCard'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ChatDetails'>
 
@@ -136,30 +127,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
       </Appbar.Header>
       <ScrollView>
         {loading && <ActivityIndicator />}
-        {!loading && (
-          <Card style={styles.details} mode="outlined">
-            <Card.Content>
-              <Text variant="titleMedium" style={styles.text}>
-                Description: {details?.description}
-              </Text>
-              <Divider />
-              <Text variant="titleMedium" style={styles.text}>
-                Start date: {details?.startDate.toDate().toLocaleDateString()}{' '}
-                {details?.startDate.toDate().toLocaleTimeString()}
-              </Text>
-              <Divider />
-              <Text variant="titleMedium" style={styles.text}>
-                End date: {details?.endDate.toDate().toLocaleDateString()}{' '}
-                {details?.endDate.toDate().toLocaleTimeString()}
-              </Text>
-              <Divider />
-              <Text variant="titleMedium" style={styles.text}>
-                Location: {details?.location.description}
-              </Text>
-              {details?.location && <SmallMapWithMarker location={details.location} />}
-            </Card.Content>
-          </Card>
-        )}
+        {!loading && details && <EventDetailsCard details={details} />}
         <View style={styles.details}>
           <View style={styles.memberHeader}>
             <Text variant="titleLarge">Members:</Text>
@@ -212,9 +180,6 @@ const styles = StyleSheet.create({
   },
   details: {
     margin: 10,
-  },
-  text: {
-    paddingVertical: 10,
   },
   memberHeader: {
     flexDirection: 'row',

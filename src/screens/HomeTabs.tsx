@@ -1,8 +1,8 @@
 import React from 'react'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs'
 import SettingsTab from './SettingsTab'
-import DiscoverTab from './DiscoverTab'
 import ChatsTab from './ChatsTab'
+import DiscoverTab from './DiscoverTab'
 
 export type HomeTabParamList = {
   DiscoverTab: undefined

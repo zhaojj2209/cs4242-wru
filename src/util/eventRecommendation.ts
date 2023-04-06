@@ -1,16 +1,43 @@
+import { auth } from '../db/firebase'
 import { stopwords } from './stopwords'
 import { EventChat, GoogLatLng } from './types'
 
-export const sortInRecommendedOrder = (events: EventChat[]) => {
-  return events
+// Event recommendation
+
+const MEMBERS_REC_WEIGHT = 0.5
+const TAGS_REC_WEIGHT = 0.5
+
+export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng) => {
+  const joinedEvents = events.filter((event) => event.members.includes(auth.currentUser?.uid ?? ''))
+  const otherUsers: string[] = []
+  const tags: string[] = []
+  joinedEvents.forEach((event) => {
+    otherUsers.push(...event.members)
+    tags.push(...event.tags)
+  })
+  const notJoinedEvents = events.filter((event) => !event.members.includes(auth.currentUser?.uid ?? ''))
+  const scores: { [key: string]: number } = {}
+  notJoinedEvents.forEach((event) => {
+    const membersScore = calcMatchRatio(otherUsers, event.members)
+    const tagsScore = calcMatchRatio(tags, event.tags)
+    const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
+    if (currLoc) {
+      const distScore = getDistanceScore(event.location.location, currLoc)
+      scores[event.id] = distScore + totalScore
+    } else {
+      scores[event.id] = totalScore
+    }
+  })
+  notJoinedEvents.sort((a, b) => scores[b.id] - scores[a.id])
+  return notJoinedEvents
 }
 
 // Search order
 
-const TITLE_WEIGHT = 0.3
-const DESC_WEIGHT = 0.25
-const LOCN_WEIGHT = 0.25
-const TAGS_WEIGHT = 0.2
+const TITLE_SEARCH_WEIGHT = 0.3
+const DESC_SEARCH_WEIGHT = 0.25
+const LOCN_SEARCH_WEIGHT = 0.25
+const TAGS_SEARCH_WEIGHT = 0.2
 
 export const getSearchedEventsInOrder = (
   events: EventChat[],
@@ -29,10 +56,10 @@ export const getSearchedEventsInOrder = (
     )
     const tagsScore = calcMatchRatio(event.tags, queryTokens)
     const totalScore =
-      titleScore * TITLE_WEIGHT +
-      descScore * DESC_WEIGHT +
-      locnScore * LOCN_WEIGHT +
-      tagsScore * TAGS_WEIGHT
+      titleScore * TITLE_SEARCH_WEIGHT +
+      descScore * DESC_SEARCH_WEIGHT +
+      locnScore * LOCN_SEARCH_WEIGHT +
+      tagsScore * TAGS_SEARCH_WEIGHT
     if (totalScore > 0) {
       eventsToDisplay.push(event)
       if (currLoc) {
@@ -52,6 +79,7 @@ const tokenizeAndRemoveStopwords = (str: string) =>
 
 const removeStopwords = (tokens: string[]) => tokens.filter((token) => !stopwords.includes(token))
 
+// Calculates percentage of tokens in the query that exist in the document
 const calcMatchRatio = (docTokens: string[], queryTokens: string[]) => {
   if (queryTokens.length === 0) {
     return 0

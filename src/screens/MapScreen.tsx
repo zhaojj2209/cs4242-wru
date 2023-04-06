@@ -39,15 +39,15 @@ const MapScreen = ({ navigation }: Props) => {
   const [events, setEvents] = useState<EventChat[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [searchedEvents, setSearchedEvents] = useState<EventChat[]>([])
+  const [recommendedEvents, setRecommendedEvents] = useState<EventChat[]>([])
   const [modalVisible, setModalVisible] = useState(false)
-  const [hasCoords, setHasCoords] = useState(true)
+  const [hasCoords, setHasCoords] = useState(false)
 
   useEffect(() => {
     ;(async () => {
       const { status } = await requestForegroundPermissionsAsync()
       if (status !== 'granted') {
         setLoading(false)
-        setHasCoords(false)
         return
       }
 
@@ -59,6 +59,7 @@ const MapScreen = ({ navigation }: Props) => {
         longitudeDelta: 0.01,
       })
       setLoading(false)
+      setHasCoords(true)
     })()
   }, [])
 
@@ -72,9 +73,13 @@ const MapScreen = ({ navigation }: Props) => {
           ...doc.data(),
         } as EventChat)
       })
-      setEvents(sortInRecommendedOrder(events))
+      setEvents(events)
     })
   }, [])
+
+  useEffect(() => {
+    setRecommendedEvents(sortInRecommendedOrder(events, hasCoords ? { lat: coords.latitude, lng: coords.longitude } : undefined))
+  }, [events, coords, hasCoords])
 
   useEffect(() => {
     if (searchQuery.length === 0) {
@@ -175,7 +180,7 @@ const MapScreen = ({ navigation }: Props) => {
                 Recommended for You
               </Text>
             )}
-            {getEventsList(searchQuery.length > 0 ? searchedEvents : events)}
+            {getEventsList(searchQuery.length > 0 ? searchedEvents : recommendedEvents)}
           </ScrollView>
           <Button
             mode="contained"

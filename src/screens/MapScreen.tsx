@@ -2,12 +2,22 @@ import { ScrollView, StyleSheet, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
-import { ActivityIndicator, Button, FAB, List, Modal, Portal, Searchbar, Text } from 'react-native-paper'
+import {
+  ActivityIndicator,
+  Button,
+  FAB,
+  List,
+  Modal,
+  Portal,
+  Searchbar,
+  Text,
+} from 'react-native-paper'
 import { EventChat } from '../util/types'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { DiscoverStackParamList } from './DiscoverTab'
+import { getSearchedEventsInOrder, sortInRecommendedOrder } from '../util/eventRecommendation'
 
 type Props = NativeStackScreenProps<DiscoverStackParamList, 'Map'>
 
@@ -56,7 +66,7 @@ const MapScreen = ({ navigation }: Props) => {
           ...doc.data(),
         } as EventChat)
       })
-      setEvents(events)
+      setEvents(sortInRecommendedOrder(events))
     })
   }, [])
 
@@ -65,25 +75,25 @@ const MapScreen = ({ navigation }: Props) => {
       setSearchedEvents([])
       return
     }
-    const eventsToDisplay: EventChat[] = []
-    events.forEach((event) => {
-      if (event.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-        eventsToDisplay.push(event)
-      } else if (event.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-        eventsToDisplay.push(event)
-      } else if (event.location.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-        eventsToDisplay.push(event)
-      } else {
-        for (const tag in event.tags) {
-          if (tag.toLowerCase().includes(searchQuery.toLowerCase())) {
-            eventsToDisplay.push(event)
-            break
-          }
-        }
-      }
-    })
-    setSearchedEvents(eventsToDisplay)
+    setSearchedEvents(getSearchedEventsInOrder(events, searchQuery))
   }, [searchQuery])
+
+  const getEventsList = (events: EventChat[]) => (
+    <List.Section>
+      {events.map((event) => (
+        <List.Item
+          key={event.id}
+          title={event.title}
+          description={event.description}
+          onPress={() => {
+            setSearchQuery('')
+            setModalVisible(false)
+            navigation.navigate('EventDetails', { event })
+          }}
+        />
+      ))}
+    </List.Section>
+  )
 
   return (
     <View style={styles.container}>
@@ -124,12 +134,7 @@ const MapScreen = ({ navigation }: Props) => {
           ))}
         </MapView>
       )}
-      <FAB
-        icon="magnify"
-        mode="flat"
-        style={styles.fab}
-        onPress={() => setModalVisible(true)}
-      />
+      <FAB icon="magnify" mode="flat" style={styles.fab} onPress={() => setModalVisible(true)} />
       <Portal>
         <Modal
           visible={modalVisible}
@@ -142,20 +147,10 @@ const MapScreen = ({ navigation }: Props) => {
             value={searchQuery}
           />
           <ScrollView>
-          <List.Section>
-          {searchedEvents.map((event) => (
-            <List.Item
-              key={event.id}
-              title={event.title}
-              description={event.description}
-              onPress={() => {
-                setSearchQuery('')
-                setModalVisible(false)
-                navigation.navigate('EventDetails', { event })
-              }}
-            />
-          ))}
-        </List.Section>
+            {searchQuery.length === 0 && (
+              <Text variant='bodyLarge' style={styles.recommendedLabel}>Recommended for You</Text>
+            )}
+            {getEventsList(searchQuery.length > 0 ? searchedEvents : events)}
           </ScrollView>
           <Button
             mode="contained"
@@ -202,4 +197,8 @@ const styles = StyleSheet.create({
     right: 0,
     top: 50,
   },
+  recommendedLabel: {
+    marginTop: 20,
+    fontWeight: 'bold',
+  }
 })

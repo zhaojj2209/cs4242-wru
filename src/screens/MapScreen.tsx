@@ -148,7 +148,9 @@ const MapScreen = ({ navigation }: Props) => {
           />
           <ScrollView>
             {searchQuery.length === 0 && (
-              <Text variant='bodyLarge' style={styles.recommendedLabel}>Recommended for You</Text>
+              <Text variant="bodyLarge" style={styles.recommendedLabel}>
+                Recommended for You
+              </Text>
             )}
             {getEventsList(searchQuery.length > 0 ? searchedEvents : events)}
           </ScrollView>
@@ -200,5 +202,5 @@ const styles = StyleSheet.create({
   recommendedLabel: {
     marginTop: 20,
     fontWeight: 'bold',
-  }
+  },
 })

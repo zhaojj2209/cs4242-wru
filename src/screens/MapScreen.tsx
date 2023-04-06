@@ -17,7 +17,11 @@ import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { DiscoverStackParamList } from './DiscoverTab'
-import { getSearchedEventsInOrder, sortInRecommendedOrder } from '../util/eventRecommendation'
+import {
+  getDistance,
+  getSearchedEventsInOrder,
+  sortInRecommendedOrder,
+} from '../util/eventRecommendation'
 
 type Props = NativeStackScreenProps<DiscoverStackParamList, 'Map'>
 
@@ -36,12 +40,14 @@ const MapScreen = ({ navigation }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchedEvents, setSearchedEvents] = useState<EventChat[]>([])
   const [modalVisible, setModalVisible] = useState(false)
+  const [hasCoords, setHasCoords] = useState(true)
 
   useEffect(() => {
     ;(async () => {
       const { status } = await requestForegroundPermissionsAsync()
       if (status !== 'granted') {
         setLoading(false)
+        setHasCoords(false)
         return
       }
 
@@ -75,7 +81,13 @@ const MapScreen = ({ navigation }: Props) => {
       setSearchedEvents([])
       return
     }
-    setSearchedEvents(getSearchedEventsInOrder(events, searchQuery))
+    setSearchedEvents(
+      getSearchedEventsInOrder(
+        events,
+        searchQuery,
+        hasCoords ? { lat: coords.latitude, lng: coords.longitude } : undefined
+      )
+    )
   }, [searchQuery])
 
   const getEventsList = (events: EventChat[]) => (
@@ -85,6 +97,17 @@ const MapScreen = ({ navigation }: Props) => {
           key={event.id}
           title={event.title}
           description={event.description}
+          right={(props) =>
+            hasCoords && (
+              <Text {...props}>
+                {getDistance(event.location.location, {
+                  lat: coords.latitude,
+                  lng: coords.longitude,
+                }).toFixed(2)}{' '}
+                km
+              </Text>
+            )
+          }
           onPress={() => {
             setSearchQuery('')
             setModalVisible(false)

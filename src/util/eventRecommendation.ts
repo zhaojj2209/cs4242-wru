@@ -1,5 +1,4 @@
 import { auth } from '../db/firebase'
-import { stopwords } from './stopwords'
 import { EventChat, GoogLatLng } from './types'
 
 // Event recommendation
@@ -49,14 +48,14 @@ export const getSearchedEventsInOrder = (
   searchQuery: string,
   currLoc?: GoogLatLng
 ) => {
-  const queryTokens = tokenizeAndRemoveStopwords(searchQuery)
+  const queryTokens = tokenize(searchQuery)
   const eventsToDisplay: EventChat[] = []
   const scores: { [key: string]: number } = {}
   events.forEach((event) => {
-    const titleScore = calcMatchRatio(tokenizeAndRemoveStopwords(event.title), queryTokens)
-    const descScore = calcMatchRatio(tokenizeAndRemoveStopwords(event.description), queryTokens)
+    const titleScore = calcMatchRatio(tokenize(event.title), queryTokens)
+    const descScore = calcMatchRatio(tokenize(event.description), queryTokens)
     const locnScore = calcMatchRatio(
-      tokenizeAndRemoveStopwords(event.location.description),
+      tokenize(event.location.description),
       queryTokens
     )
     const tagsScore = calcMatchRatio(event.tags, queryTokens)
@@ -79,10 +78,7 @@ export const getSearchedEventsInOrder = (
   return eventsToDisplay
 }
 
-const tokenizeAndRemoveStopwords = (str: string) =>
-  removeStopwords(str.toLocaleLowerCase().split(' '))
-
-const removeStopwords = (tokens: string[]) => tokens.filter((token) => !stopwords.includes(token))
+const tokenize = (str: string) => str.toLocaleLowerCase().split(' ')
 
 // Calculates percentage of tokens in the query that exist in the document
 const calcMatchRatio = (docTokens: string[], queryTokens: string[]) => {

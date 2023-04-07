@@ -40,11 +40,12 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
 
   const now = new Date()
   now.setMinutes(0)
+  now.setSeconds(0)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [startDate, setStartDate] = useState(now)
-  const [endDate, setEndDate] = useState(new Date(now.getTime() + ONE_HOUR_IN_MILLISECONDS))
+  const [startDate, setStartDate] = useState(new Date(now.getTime() + ONE_HOUR_IN_MILLISECONDS))
+  const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
   const [isPublic, setIsPublic] = useState(false)
   const [tags, setTags] = useState<string[]>([])
 

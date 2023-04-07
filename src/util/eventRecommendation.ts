@@ -20,7 +20,8 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
   )
   const scores: { [key: string]: number } = {}
   notJoinedEvents.forEach((event) => {
-    const membersScore = calcMatchRatio(otherUsers, event.members)
+    const numSharedMembers = otherUsers.filter((token) => event.members.includes(token)).length
+    const membersScore = numSharedMembers === 0 ? 0 : Math.log10(numSharedMembers)
     const tagsScore = calcMatchRatio(tags, event.tags)
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {

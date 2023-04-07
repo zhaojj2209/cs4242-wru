@@ -68,10 +68,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
     })
 
     if (moment().isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
-      console.log('true')
       setUpcoming(true)
     } else {
-      console.log('false')
       setUpcoming(false)
     }
 
@@ -79,7 +77,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
   }, [])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
-
     const confg = {
       method: 'get',
       url:
@@ -96,8 +93,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
       headers: {},
     }
 
-    console.log(confg)
-
     axios(confg)
       .then((resp) => {
         // let respJson = JSON.stringify(resp.data)
@@ -110,7 +105,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
         })
 
         setDirections(coordsArr)
-        console.log('duration: ' + resp.data.routes[0].legs[0].duration.text)
+        // console.log('duration: ' + resp.data.routes[0].legs[0].duration.text)
         setRouteDuration(resp.data.routes[0].legs[0].duration.text)
         // console.log(coordsArr)
         return coordsArr
@@ -171,10 +166,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
               style={styles.map}
               initialRegion={coords}
               showsUserLocation
-              onMapReady={() => {
-                console.log(location)
-                console.log(coords)
-              }}
               onLayout={() => {
                 if (mapRef.current) {
                   mapRef.current.fitToCoordinates(

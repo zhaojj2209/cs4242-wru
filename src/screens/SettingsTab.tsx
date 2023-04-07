@@ -1,9 +1,9 @@
-import { StyleSheet, View, TouchableHighlight, Alert } from 'react-native'
+import { StyleSheet, View, TouchableHighlight, Alert, SafeAreaView } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Avatar, Button, Text, useTheme } from 'react-native-paper'
+import { Avatar, Button, IconButton, Text, TextInput, useTheme } from 'react-native-paper'
 import { auth, db, storage } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth'
+import { signOut, updateProfile } from 'firebase/auth'
 import { HomeTabParamList } from './HomeTabs'
 import { CompositeScreenProps } from '@react-navigation/native'
 import { MaterialBottomTabScreenProps } from '@react-navigation/material-bottom-tabs'
@@ -26,6 +26,8 @@ const SettingsTab = ({ navigation }: Props) => {
 
   const [displayName, setDisplayName] = useState('')
   const [photoURL, setPhotoURL] = useState('')
+  const [isEditDisplayName, setIsEditDisplayName] = useState(false)
+
   const handleLogout = () => {
     signOut(auth).then(() => {
       navigation.replace('Login')
@@ -36,17 +38,10 @@ const SettingsTab = ({ navigation }: Props) => {
     if (auth.currentUser?.photoURL) {
       setPhotoURL(auth.currentUser.photoURL)
     }
+    if (auth.currentUser?.displayName) {
+      setDisplayName(auth.currentUser.displayName)
+    }
   }, [auth.currentUser])
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setDisplayName(user.displayName ?? '')
-      }
-    })
-
-    return unsubscribe
-  }, [])
 
   const upload = async (uid: string | undefined) => {
     if (uid != undefined) {
@@ -87,39 +82,50 @@ const SettingsTab = ({ navigation }: Props) => {
     }
   }
 
+  const handleEditDisplayName = () => {
+    if (isEditDisplayName) {
+      setIsEditDisplayName(false)
+      if (auth.currentUser != null) {
+        updateProfile(auth.currentUser, { displayName })
+        updateDoc(doc(db, 'users', auth.currentUser.uid), { displayName })
+      }
+    } else {
+      setIsEditDisplayName(true)
+    }
+  }
+
   return (
-    <View style={styles.container}>
-      <>
-        {auth.currentUser != null && photoURL == '' ? (
-          <TouchableHighlight
-            onPress={() => {
-              upload(auth.currentUser?.uid)
-            }}
-            underlayColor={theme.colors.background}
-          >
-            <View>
-              <Avatar.Text size={100} label={displayName} />
-            </View>
-          </TouchableHighlight>
+    <SafeAreaView style={styles.container}>
+      <TouchableHighlight
+        onPress={() => {
+          upload(auth.currentUser?.uid)
+        }}
+        underlayColor={theme.colors.background}
+      >
+        <View style={styles.pfp}>
+          <Avatar.Image size={100} source={{ uri: photoURL }} />
+          <Text>Tap to change picture</Text>
+        </View>
+      </TouchableHighlight>
+      <View style={styles.setting}>
+        <Text variant='bodyLarge' style={styles.text}>Email:</Text>
+        <Text variant='bodyLarge' style={styles.text}>{auth.currentUser?.email}</Text>
+      </View>
+      <View style={styles.setting}>
+        <View style={styles.header}>
+          <Text variant='bodyLarge' style={styles.text}>Display Name:</Text>
+          <IconButton icon={isEditDisplayName ? 'content-save' : 'pencil'} onPress={handleEditDisplayName}/>
+        </View>
+        {isEditDisplayName ? (
+          <TextInput value={displayName} onChangeText={(text) => setDisplayName(text)} />
         ) : (
-          <TouchableHighlight
-            onPress={() => {
-              upload(auth.currentUser?.uid)
-            }}
-            underlayColor={theme.colors.background}
-          >
-            <View>
-              <Avatar.Image size={100} source={{ uri: photoURL }} />
-            </View>
-          </TouchableHighlight>
+          <Text variant='bodyLarge' style={styles.text}>{displayName.length > 0 ? displayName : 'None'}</Text>
         )}
-      </>
-      <Text>Display Name: {auth.currentUser?.displayName}</Text>
-      <Text>Email: {auth.currentUser?.email}</Text>
+      </View>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
         Log Out
       </Button>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -128,10 +134,23 @@ export default SettingsTab
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
   button: {
     margin: 5,
   },
+  pfp: {
+    alignItems: 'center',
+  },
+  setting: {
+    width: '80%',
+  },
+  text: {
+    marginVertical: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  }
 })

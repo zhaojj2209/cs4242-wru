@@ -17,14 +17,7 @@ const EditChatScreen = ({ route, navigation }: Props) => {
     updateDoc(docRef, {
       ...data,
     })
-      .then(() => {
-        Alert.alert('Update success!', '', [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ])
-      })
+      .then(() => navigation.goBack())
       .catch((error) => Alert.alert(error))
   }
 

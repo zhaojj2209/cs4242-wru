@@ -47,14 +47,7 @@ const RegisterScreen = ({ navigation }: Props) => {
           displayName,
           photoURL: DEFAULT_PFP_URL,
         })
-          .then(() => {
-            Alert.alert('Account created!', '', [
-              {
-                text: 'OK',
-                onPress: () => navigation.navigate('Home'),
-              },
-            ])
-          })
+          .then(() => navigation.navigate('Home'))
           .catch((error) => Alert.alert(error))
       })
       .catch((error) => Alert.alert(formatError(error.message)))

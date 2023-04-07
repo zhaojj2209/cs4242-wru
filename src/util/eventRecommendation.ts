@@ -15,7 +15,9 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
     otherUsers.push(...event.members)
     tags.push(...event.tags)
   })
-  const notJoinedEvents = events.filter((event) => !event.members.includes(auth.currentUser?.uid ?? ''))
+  const notJoinedEvents = events.filter(
+    (event) => !event.members.includes(auth.currentUser?.uid ?? '')
+  )
   const scores: { [key: string]: number } = {}
   notJoinedEvents.forEach((event) => {
     const membersScore = calcMatchRatio(otherUsers, event.members)

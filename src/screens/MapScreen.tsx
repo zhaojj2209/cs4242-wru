@@ -78,7 +78,12 @@ const MapScreen = ({ navigation }: Props) => {
   }, [])
 
   useEffect(() => {
-    setRecommendedEvents(sortInRecommendedOrder(events, hasCoords ? { lat: coords.latitude, lng: coords.longitude } : undefined))
+    setRecommendedEvents(
+      sortInRecommendedOrder(
+        events,
+        hasCoords ? { lat: coords.latitude, lng: coords.longitude } : undefined
+      )
+    )
   }, [events, coords, hasCoords])
 
   useEffect(() => {

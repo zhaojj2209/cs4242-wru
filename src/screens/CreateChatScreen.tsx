@@ -13,14 +13,7 @@ type Props = NativeStackScreenProps<ChatsStackParamList, 'CreateChat'>
 const CreateChatScreen = ({ navigation }: Props) => {
   const handleCreateChat = (data: EventChatFormParams) => {
     addDoc(collection(db, 'chats'), data)
-      .then(() => {
-        Alert.alert('Chat created!', '', [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ])
-      })
+      .then(() => navigation.goBack())
       .catch((error) => Alert.alert(error))
   }
 

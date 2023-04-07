@@ -71,27 +71,11 @@ const AddMembersScreen = ({ route, navigation }: Props) => {
       Alert.alert('Please select one or more users to add!')
       return
     }
-    Alert.alert('Confirm selection?', `Click "OK" to add ${usersToAdd.length} user(s).`, [
-      {
-        text: 'OK',
-        onPress: () =>
-          updateDoc(doc(db, 'chats', chatID), {
-            members: members.concat(usersToAdd),
-          })
-            .then(() =>
-              Alert.alert('Members added!', '', [
-                {
-                  text: 'OK',
-                  onPress: () => navigation.goBack(),
-                },
-              ])
-            )
-            .catch((error) => Alert.alert(error)),
-      },
-      {
-        text: 'Cancel',
-      },
-    ])
+    updateDoc(doc(db, 'chats', chatID), {
+      members: members.concat(usersToAdd),
+    })
+      .then(() => navigation.goBack())
+      .catch((error) => Alert.alert(error))
   }
 
   return (

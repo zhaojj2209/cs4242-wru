@@ -4,8 +4,9 @@ import { EventChat, GoogLatLng } from './types'
 
 // Event recommendation
 
-const MEMBERS_REC_WEIGHT = 0.5
-const TAGS_REC_WEIGHT = 0.5
+const MEMBERS_REC_WEIGHT = 0.4
+const TAGS_REC_WEIGHT = 0.4
+const DIST_REC_WEIGHT = 0.2
 
 export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng) => {
   const joinedEvents = events.filter((event) => event.members.includes(auth.currentUser?.uid ?? ''))
@@ -26,7 +27,7 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {
       const distScore = getDistanceScore(event.location.location, currLoc)
-      scores[event.id] = distScore + totalScore
+      scores[event.id] = (distScore * DIST_REC_WEIGHT) + totalScore
     } else {
       scores[event.id] = totalScore
     }
@@ -38,9 +39,10 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
 // Search order
 
 const TITLE_SEARCH_WEIGHT = 0.3
-const DESC_SEARCH_WEIGHT = 0.25
-const LOCN_SEARCH_WEIGHT = 0.25
-const TAGS_SEARCH_WEIGHT = 0.2
+const DESC_SEARCH_WEIGHT = 0.2
+const LOCN_SEARCH_WEIGHT = 0.2
+const TAGS_SEARCH_WEIGHT = 0.15
+const DIST_SEARCH_WEIGHT = 0.15
 
 export const getSearchedEventsInOrder = (
   events: EventChat[],
@@ -67,8 +69,8 @@ export const getSearchedEventsInOrder = (
       eventsToDisplay.push(event)
       if (currLoc) {
         const distScore = getDistanceScore(event.location.location, currLoc)
-        scores[event.id] = distScore + totalScore
-      } else {
+        scores[event.id] = (distScore * DIST_SEARCH_WEIGHT) + totalScore
+      } else {  
         scores[event.id] = totalScore
       }
     }

@@ -1,12 +1,22 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { GiftedChat, Bubble, Send } from 'react-native-gifted-chat'
 import { auth, db } from '../db/firebase'
-import { Appbar, IconButton, useTheme } from 'react-native-paper'
-import { Message } from '../util/types'
-import { collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { Appbar, Button, Card, IconButton, Text, useTheme } from 'react-native-paper'
+import { EventChat, Message } from '../util/types'
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  where,
+  getDoc,
+} from 'firebase/firestore'
 import { HomeStackParamList } from './HomeScreen'
+import ChatDirectionsCard from '../components/ChatDirectionsCard'
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Chat'>
 
@@ -15,6 +25,9 @@ const ChatScreen = ({ route, navigation }: Props) => {
   const theme = useTheme()
 
   const [messages, setMessages] = useState<Message[]>([])
+
+  const [loading, setLoading] = useState(false)
+  const [details, setDetails] = useState<EventChat | undefined>(undefined)
 
   useLayoutEffect(() => {
     const q = query(collection(db, 'chats', chatID, 'messages'), orderBy('createdAt', 'desc'))
@@ -28,6 +41,17 @@ const ChatScreen = ({ route, navigation }: Props) => {
         }))
       )
     )
+
+    const docRef = doc(db, 'chats', chatID)
+    getDoc(docRef).then((document) => {
+      if (document.exists()) {
+        const data = document.data()
+        setDetails({
+          id: chatID,
+          ...data,
+        } as EventChat)
+      }
+    })
 
     return () => {
       unsubscribe()
@@ -83,6 +107,8 @@ const ChatScreen = ({ route, navigation }: Props) => {
           onPress={() => navigation.navigate('ChatDetails', route.params)}
         />
       </Appbar.Header>
+      {!loading && details && <ChatDirectionsCard event={details} />}
+
       <GiftedChat
         messages={messages}
         // showAvatarForEveryMessage={true}
@@ -104,6 +130,10 @@ const ChatScreen = ({ route, navigation }: Props) => {
 export default ChatScreen
 
 const styles = StyleSheet.create({
+  map: {
+    width: '100%',
+    height: 150,
+  },
   container: {
     flex: 1,
     paddingBottom: 40,

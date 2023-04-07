@@ -26,6 +26,7 @@ import { auth } from '../db/firebase'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import SmallMapWithMarker from './SmallMapWithMarker'
 import Tags from 'react-native-tags'
+import { api_key } from '../../config'
 
 export interface EventChatFormProps {
   navigation: any
@@ -33,9 +34,8 @@ export interface EventChatFormProps {
   data?: EventChat
 }
 
-const key = 'AIzaSyCDjmy606TvoOLTa6apk2uYtdX-sX4dI1w'
-
 const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
+  const key = api_key
   const ONE_HOUR_IN_MILLISECONDS = 3600 * 1000
 
   const now = new Date()

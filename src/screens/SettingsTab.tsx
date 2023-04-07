@@ -108,18 +108,29 @@ const SettingsTab = ({ navigation }: Props) => {
         </View>
       </TouchableHighlight>
       <View style={styles.setting}>
-        <Text variant='bodyLarge' style={styles.text}>Email:</Text>
-        <Text variant='bodyLarge' style={styles.text}>{auth.currentUser?.email}</Text>
+        <Text variant="bodyLarge" style={styles.text}>
+          Email:
+        </Text>
+        <Text variant="bodyLarge" style={styles.text}>
+          {auth.currentUser?.email}
+        </Text>
       </View>
       <View style={styles.setting}>
         <View style={styles.header}>
-          <Text variant='bodyLarge' style={styles.text}>Display Name:</Text>
-          <IconButton icon={isEditDisplayName ? 'content-save' : 'pencil'} onPress={handleEditDisplayName}/>
+          <Text variant="bodyLarge" style={styles.text}>
+            Display Name:
+          </Text>
+          <IconButton
+            icon={isEditDisplayName ? 'content-save' : 'pencil'}
+            onPress={handleEditDisplayName}
+          />
         </View>
         {isEditDisplayName ? (
           <TextInput value={displayName} onChangeText={(text) => setDisplayName(text)} />
         ) : (
-          <Text variant='bodyLarge' style={styles.text}>{displayName.length > 0 ? displayName : 'None'}</Text>
+          <Text variant="bodyLarge" style={styles.text}>
+            {displayName.length > 0 ? displayName : 'None'}
+          </Text>
         )}
       </View>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
@@ -152,5 +163,5 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-  }
+  },
 })

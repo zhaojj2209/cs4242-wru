@@ -1,6 +1,11 @@
 import { auth } from '../db/firebase'
 import { EventChat, GoogLatLng } from './types'
 
+// Constants to speed up calculation
+const p = Math.PI / 180
+const c = Math.cos
+const inverselog20 = 1 / Math.log(20)
+
 // Event recommendation
 
 const MEMBERS_REC_WEIGHT = 0.4
@@ -21,7 +26,7 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
   const scores: { [key: string]: number } = {}
   notJoinedEvents.forEach((event) => {
     const numSharedMembers = otherUsers.filter((token) => event.members.includes(token)).length
-    const membersScore = numSharedMembers === 0 ? 0 : Math.log10(numSharedMembers)
+    const membersScore = Math.log(numSharedMembers + 1) * inverselog20
     const tagsScore = calcMatchRatio(tags, event.tags)
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {
@@ -100,8 +105,6 @@ export const getDistance = (loc1: GoogLatLng, loc2: GoogLatLng) => {
   const lon1 = loc1.lng
   const lat2 = loc2.lat
   const lon2 = loc2.lng
-  const p = Math.PI / 180
-  const c = Math.cos
   const a =
     0.5 - c((lat2 - lat1) * p) / 2 + (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2
 

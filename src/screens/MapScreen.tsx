@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
 import {
@@ -18,9 +18,11 @@ import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { DiscoverStackParamList } from './DiscoverTab'
 import {
+  buildIndex,
   getDistance,
   getSearchedEventsInOrder,
   sortInRecommendedOrder,
+  tokenize,
 } from '../util/eventRecommendation'
 
 type Props = NativeStackScreenProps<DiscoverStackParamList, 'Map'>
@@ -77,6 +79,11 @@ const MapScreen = ({ navigation }: Props) => {
     })
   }, [])
 
+  const titleIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.title))), [events])
+  const descIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.description))), [events])
+  const locnIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.location.description))), [events])
+  const tagsIndex = useMemo(() =>  buildIndex(events.map((event) => event.tags)), [events])
+
   useEffect(() => {
     setRecommendedEvents(
       sortInRecommendedOrder(
@@ -95,6 +102,10 @@ const MapScreen = ({ navigation }: Props) => {
       getSearchedEventsInOrder(
         events,
         searchQuery,
+        titleIndex,
+        descIndex,
+        locnIndex,
+        tagsIndex,
         hasCoords ? { lat: coords.latitude, lng: coords.longitude } : undefined
       )
     )

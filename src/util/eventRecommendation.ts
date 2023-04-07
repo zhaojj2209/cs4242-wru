@@ -4,7 +4,10 @@ import { EventChat, GoogLatLng } from './types'
 // Constants to speed up calculation
 const p = Math.PI / 180
 const c = Math.cos
-const inverselog20 = 1 / Math.log(20)
+const l = Math.log
+const r = Math.sqrt
+const inverselog20 = 1 / l(20)
+const COLLECTION_SIZE = 'COLLECTION_SIZE'
 
 // Event recommendation
 
@@ -26,7 +29,7 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
   const scores: { [key: string]: number } = {}
   notJoinedEvents.forEach((event) => {
     const numSharedMembers = otherUsers.filter((token) => event.members.includes(token)).length
-    const membersScore = Math.log(numSharedMembers + 1) * inverselog20
+    const membersScore = l(numSharedMembers + 1) * inverselog20
     const tagsScore = calcMatchRatio(tags, event.tags)
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {
@@ -51,19 +54,24 @@ const DIST_SEARCH_WEIGHT = 0.15
 export const getSearchedEventsInOrder = (
   events: EventChat[],
   searchQuery: string,
+  titleIndex: { [key: string]: number },
+  descIndex: { [key: string]: number },
+  locnIndex: { [key: string]: number },
+  tagsIndex: { [key: string]: number },
   currLoc?: GoogLatLng
 ) => {
   const queryTokens = tokenize(searchQuery)
   const eventsToDisplay: EventChat[] = []
   const scores: { [key: string]: number } = {}
   events.forEach((event) => {
-    const titleScore = calcMatchRatio(tokenize(event.title), queryTokens)
-    const descScore = calcMatchRatio(tokenize(event.description), queryTokens)
-    const locnScore = calcMatchRatio(
+    const titleScore = calcTfIdf(tokenize(event.title), queryTokens, titleIndex)
+    const descScore = calcTfIdf(tokenize(event.description), queryTokens, descIndex)
+    const locnScore = calcTfIdf(
       tokenize(event.location.description),
-      queryTokens
+      queryTokens,
+      locnIndex
     )
-    const tagsScore = calcMatchRatio(event.tags, queryTokens)
+    const tagsScore = calcTfIdf(event.tags, queryTokens, tagsIndex)
     const totalScore =
       titleScore * TITLE_SEARCH_WEIGHT +
       descScore * DESC_SEARCH_WEIGHT +
@@ -83,7 +91,7 @@ export const getSearchedEventsInOrder = (
   return eventsToDisplay
 }
 
-const tokenize = (str: string) => str.toLocaleLowerCase().split(' ')
+export const tokenize = (str: string) => str.toLocaleLowerCase().split(' ')
 
 // Calculates percentage of tokens in the query that exist in the document
 const calcMatchRatio = (docTokens: string[], queryTokens: string[]) => {
@@ -108,5 +116,38 @@ export const getDistance = (loc1: GoogLatLng, loc2: GoogLatLng) => {
   const a =
     0.5 - c((lat2 - lat1) * p) / 2 + (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2
 
-  return 12742 * Math.asin(Math.sqrt(a)) // 2 * R; R = 6371 km
+  return 12742 * Math.asin(r(a)) // 2 * R; R = 6371 km
+}
+
+export const buildIndex = (docs: string[][]) => {
+  const index: { [key: string]: number } = {}
+  index[COLLECTION_SIZE] = docs.length
+  docs.forEach((doc) => {
+    const set = new Set(doc)
+    set.forEach((token) => {
+      if (index[token]) {
+        index[token] = index[token] + 1
+      } else {
+        index[token] = 1
+      }
+    })
+  })
+  return index
+}
+
+const calcTfIdf = (docTokens: string[], queryTokens: string[], index: { [key: string]: number }) => {
+  if (queryTokens.length === 0) {
+    return 0
+  }
+  let sumSquares = 0
+  queryTokens.forEach((token) => {
+    const rawTf = docTokens.filter((docToken) => docToken === token).length
+    const logTf = rawTf === 0 ? 0 : 1 + l(rawTf)
+    const df = index[token] ?? 0
+    const idf = df === 0 ? 0 : l(index[COLLECTION_SIZE]/df)
+    const tfidf = logTf * idf
+    sumSquares += tfidf ** 2
+  })
+  
+  return 1 / r(sumSquares)
 }

@@ -48,6 +48,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
   const [endDate, setEndDate] = useState(new Date(startDate.getTime() + ONE_HOUR_IN_MILLISECONDS))
   const [isPublic, setIsPublic] = useState(false)
   const [tags, setTags] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const theme = useTheme()
 
@@ -70,6 +71,7 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
       setIsPublic(data.isPublic)
       setTags(data.tags)
     }
+    setIsLoading(false)
   }, [data])
 
   const handleChangeStartDate = (date: Date) => {
@@ -161,20 +163,24 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
           <Text variant="bodyLarge" style={styles.dateLabel}>
             Tags (optional):
           </Text>
-          <Tags
-            initialText=""
-            textInputProps={{
-              placeholder: 'Keywords to describe the event',
-            }}
-            initialTags={tags}
-            onChangeTags={(tags) => setTags(tags)}
-            inputStyle={{ backgroundColor: theme.colors.background }}
-            renderTag={({ tag, index, onPress, deleteTagOnPress, readonly }) => (
-              <Chip key={`${tag}-${index}`} onPress={onPress}>
-                {tag}
-              </Chip>
-            )}
-          />
+          {isLoading ? (
+            <></>
+          ) : (
+            <Tags
+              initialText=""
+              textInputProps={{
+                placeholder: 'Keywords to describe the event',
+              }}
+              initialTags={tags}
+              onChangeTags={(tags) => setTags(tags)}
+              inputStyle={{ backgroundColor: theme.colors.background }}
+              renderTag={({ tag, index, onPress, deleteTagOnPress, readonly }) => (
+                <Chip key={`${tag}-${index}`} onPress={onPress}>
+                  {tag}
+                </Chip>
+              )}
+            />
+          )}
           <View style={styles.switchContainer}>
             <Text variant="bodyLarge" style={styles.dateLabel}>
               Set event as public

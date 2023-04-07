@@ -72,9 +72,9 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
         onPress: () =>
           deleteDoc(doc(db, 'chats', chatID))
             .then(() =>
-            navigation.replace('HomeTabs', {
-              screen: 'ChatsTab',
-            })
+              navigation.replace('HomeTabs', {
+                screen: 'ChatsTab',
+              })
             )
             .catch((error) => Alert.alert(error)),
       },

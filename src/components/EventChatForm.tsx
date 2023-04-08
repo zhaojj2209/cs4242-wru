@@ -87,6 +87,18 @@ const EventChatForm = ({ navigation, data, onSubmit }: EventChatFormProps) => {
         Alert.alert('Error: Not signed in!')
         return
       }
+      if (title.length === 0) {
+        Alert.alert('Error: Title cannot be empty!')
+        return
+      }
+      if (description.length === 0) {
+        Alert.alert('Error: Description cannot be empty!')
+        return
+      }
+      if (location.location.lat === 0 && location.location.lng === 0) {
+        Alert.alert('Error: Please choose a location!')
+        return
+      }
       const data = {
         title,
         description,

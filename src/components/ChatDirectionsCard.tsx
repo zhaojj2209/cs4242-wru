@@ -1,20 +1,12 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  Button,
-  Card,
-  Checkbox,
-  Divider,
-  RadioButton,
-  Text,
-  ToggleButton,
-} from 'react-native-paper'
+import React, { useEffect, useRef, useState } from 'react'
+import { Button, Card, Checkbox, Text, ToggleButton } from 'react-native-paper'
 import { EventChat } from '../util/types'
 import MapView, { Marker, Polyline } from 'react-native-maps'
 import { getCurrentPositionAsync } from 'expo-location'
 import axios from 'axios'
 import { decode } from '@mapbox/polyline'
-import { createMapLink, createOpenLink } from 'react-native-open-maps'
+import { createOpenLink } from 'react-native-open-maps'
 import moment from 'moment'
 import { api_key } from '../../config'
 import * as Device from 'expo-device'
@@ -89,11 +81,10 @@ const ChatDirectionsCard = ({ event }: Props) => {
       setRouteReload(false)
     }
 
-    return () => {}
   }, [location, routeReload])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
-    var arrTimeStr = useArrTime ? '&arrival_time=' + event.startDate.seconds : ''
+    const arrTimeStr = useArrTime ? '&arrival_time=' + event.startDate.seconds : ''
     const confg = {
       method: 'get',
       url:
@@ -113,8 +104,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
     axios(confg)
       .then((resp) => {
         // let respJson = JSON.stringify(resp.data)
-        let points = decode(resp.data.routes[0].overview_polyline.points)
-        let coordsArr = points.map((point, index) => {
+        const points = decode(resp.data.routes[0].overview_polyline.points)
+        const coordsArr = points.map((point, index) => {
           return {
             latitude: point[0],
             longitude: point[1],
@@ -140,7 +131,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
       })
       .catch((error) => {
         console.log(error)
-        return error
       })
   }
 
@@ -152,7 +142,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
   }
 
   const calculateTimeToEvent = () => {
-    var eventTime = moment(event.startDate.toDate())
+    const eventTime = moment(event.startDate.toDate())
     return eventTime.fromNow()
   }
 

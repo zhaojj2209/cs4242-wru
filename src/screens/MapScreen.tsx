@@ -1,5 +1,5 @@
-import { ScrollView, StyleSheet, View } from 'react-native'
-import React, { useEffect, useMemo, useState } from 'react'
+import { Alert, ScrollView, StyleSheet, View } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
 import {
@@ -24,6 +24,7 @@ import {
   sortInRecommendedOrder,
   tokenize,
 } from '../util/eventRecommendation'
+import { useFocusEffect } from '@react-navigation/native'
 
 type Props = NativeStackScreenProps<DiscoverStackParamList, 'Map'>
 
@@ -65,19 +66,27 @@ const MapScreen = ({ navigation }: Props) => {
     })()
   }, [])
 
-  useEffect(() => {
-    const q = query(collection(db, 'chats'), where('isPublic', '==', true))
-    getDocs(q).then((docs) => {
-      const events: EventChat[] = []
-      docs.forEach((doc) => {
-        events.push({
-          id: doc.id,
-          ...doc.data(),
-        } as EventChat)
-      })
-      setEvents(events)
-    })
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      const q = query(
+        collection(db, 'chats'),
+        where('isPublic', '==', true),
+        where('startDate', '>', new Date())
+      )
+      getDocs(q)
+        .then((docs) => {
+          const events: EventChat[] = []
+          docs.forEach((doc) => {
+            events.push({
+              id: doc.id,
+              ...doc.data(),
+            } as EventChat)
+          })
+          setEvents(events)
+        })
+        .catch((error) => Alert.alert(error))
+    }, [])
+  )
 
   const titleIndex = useMemo(
     () => buildIndex(events.map((event) => tokenize(event.title))),

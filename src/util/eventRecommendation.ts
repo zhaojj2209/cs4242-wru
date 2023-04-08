@@ -34,7 +34,7 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {
       const distScore = getDistanceScore(event.location.location, currLoc)
-      scores[event.id] = (distScore * DIST_REC_WEIGHT) + totalScore
+      scores[event.id] = distScore * DIST_REC_WEIGHT + totalScore
     } else {
       scores[event.id] = totalScore
     }
@@ -66,11 +66,7 @@ export const getSearchedEventsInOrder = (
   events.forEach((event) => {
     const titleScore = calcTfIdf(tokenize(event.title), queryTokens, titleIndex)
     const descScore = calcTfIdf(tokenize(event.description), queryTokens, descIndex)
-    const locnScore = calcTfIdf(
-      tokenize(event.location.description),
-      queryTokens,
-      locnIndex
-    )
+    const locnScore = calcTfIdf(tokenize(event.location.description), queryTokens, locnIndex)
     const tagsScore = calcTfIdf(event.tags, queryTokens, tagsIndex)
     const totalScore =
       titleScore * TITLE_SEARCH_WEIGHT +
@@ -81,8 +77,8 @@ export const getSearchedEventsInOrder = (
       eventsToDisplay.push(event)
       if (currLoc) {
         const distScore = getDistanceScore(event.location.location, currLoc)
-        scores[event.id] = (distScore * DIST_SEARCH_WEIGHT) + totalScore
-      } else {  
+        scores[event.id] = distScore * DIST_SEARCH_WEIGHT + totalScore
+      } else {
         scores[event.id] = totalScore
       }
     }
@@ -135,7 +131,11 @@ export const buildIndex = (docs: string[][]) => {
   return index
 }
 
-const calcTfIdf = (docTokens: string[], queryTokens: string[], index: { [key: string]: number }) => {
+const calcTfIdf = (
+  docTokens: string[],
+  queryTokens: string[],
+  index: { [key: string]: number }
+) => {
   if (queryTokens.length === 0) {
     return 0
   }
@@ -144,10 +144,10 @@ const calcTfIdf = (docTokens: string[], queryTokens: string[], index: { [key: st
     const rawTf = docTokens.filter((docToken) => docToken === token).length
     const logTf = rawTf === 0 ? 0 : 1 + l(rawTf)
     const df = index[token] ?? 0
-    const idf = df === 0 ? 0 : l(index[COLLECTION_SIZE]/df)
+    const idf = df === 0 ? 0 : l(index[COLLECTION_SIZE] / df)
     const tfidf = logTf * idf
     sumSquares += tfidf ** 2
   })
-  
+
   return 1 / r(sumSquares)
 }

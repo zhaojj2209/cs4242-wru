@@ -79,10 +79,19 @@ const MapScreen = ({ navigation }: Props) => {
     })
   }, [])
 
-  const titleIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.title))), [events])
-  const descIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.description))), [events])
-  const locnIndex = useMemo(() =>  buildIndex(events.map((event) => tokenize(event.location.description))), [events])
-  const tagsIndex = useMemo(() =>  buildIndex(events.map((event) => event.tags)), [events])
+  const titleIndex = useMemo(
+    () => buildIndex(events.map((event) => tokenize(event.title))),
+    [events]
+  )
+  const descIndex = useMemo(
+    () => buildIndex(events.map((event) => tokenize(event.description))),
+    [events]
+  )
+  const locnIndex = useMemo(
+    () => buildIndex(events.map((event) => tokenize(event.location.description))),
+    [events]
+  )
+  const tagsIndex = useMemo(() => buildIndex(events.map((event) => event.tags)), [events])
 
   useEffect(() => {
     setRecommendedEvents(

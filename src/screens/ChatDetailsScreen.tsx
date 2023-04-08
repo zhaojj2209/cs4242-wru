@@ -1,6 +1,6 @@
 import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Appbar, Avatar, Button, Card, List, Text } from 'react-native-paper'
+import { ActivityIndicator, Appbar, Avatar, Button, Card, IconButton, List, Text } from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
@@ -112,6 +112,32 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
     ])
   }
 
+  const handleRemove = (user: User) => {
+    if (!details || !auth.currentUser) {
+      return
+    }
+    Alert.alert(`Remvove ${user.displayName ?? user.email}?`, '', [
+      {
+        text: 'OK',
+        onPress: () => {
+          // splicing returns new array containing removed elements;
+          // original array has the elements removed
+          details.members.splice(details.members.indexOf(user.uid), 1)
+          updateDoc(doc(db, 'chats', chatID), {
+            members: details.members,
+          })
+            .then(() =>
+              setMembers(members.filter((member) => member.uid !== user.uid))
+            )
+            .catch((error) => Alert.alert(error))
+        },
+      },
+      {
+        text: 'Cancel',
+      },
+    ])
+  }
+
   return (
     <View style={styles.container}>
       <Appbar.Header mode="center-aligned" elevated>
@@ -125,14 +151,16 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
         <View style={styles.details}>
           <View style={styles.memberHeader}>
             <Text variant="titleLarge">Members:</Text>
-            <Button
-              icon="plus"
-              onPress={() =>
-                navigation.navigate('AddMembers', { chatID, members: details?.members ?? [] })
-              }
-            >
-              Add members
-            </Button>
+            {isCreator && (
+              <Button
+                icon="plus"
+                onPress={() =>
+                  navigation.navigate('AddMembers', { chatID, members: details?.members ?? [] })
+                }
+              >
+                Add members
+              </Button>
+            )}
           </View>
           <Card style={styles.members} mode="outlined">
             <Card.Content>
@@ -144,6 +172,9 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
                     left={(props) => (
                       <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
                     )}
+                    right={(props) => isCreator && member.uid !== details?.creator ? (
+                      <IconButton {...props} icon="account-remove" onPress={() => handleRemove(member)} />
+                    ) : <></>}
                   />
                 ))}
               </List.Section>

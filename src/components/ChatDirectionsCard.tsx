@@ -104,6 +104,20 @@ const ChatDirectionsCard = ({ event }: Props) => {
     }
   })
 
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.fitToCoordinates(
+        [
+          { latitude: location.lat, longitude: location.lng },
+          { latitude: coords.latitude, longitude: coords.longitude },
+        ],
+        {
+          animated: true,
+        }
+      )
+    }
+  }, [location])
+
   // Location permissions
   useEffect(() => {
     if (upcoming && !routeLoaded) {
@@ -168,17 +182,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
           value: resp.data.routes[0].legs[0].duration.value,
         })
         // console.log(resp.data.routes[0].legs[0].steps)
-        if (mapRef.current) {
-          mapRef.current.fitToCoordinates(
-            [
-              { latitude: location.lat, longitude: location.lng },
-              { latitude: coords.latitude, longitude: coords.longitude },
-            ],
-            {
-              animated: true,
-            }
-          )
-        }
 
         //Notification
         const timeToLeave = moment(event.startDate.toDate()).subtract(
@@ -300,21 +303,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
               ref={mapRef}
               provider="google"
               style={styles.map}
-              initialRegion={coords}
+              region={coords}
               showsUserLocation
-              onLayout={() => {
-                if (mapRef.current) {
-                  mapRef.current.fitToCoordinates(
-                    [
-                      { latitude: location.lat, longitude: location.lng },
-                      { latitude: coords.latitude, longitude: coords.longitude },
-                    ],
-                    {
-                      animated: true,
-                    }
-                  )
-                }
-              }}
             >
               <Polyline coordinates={directions} strokeWidth={2} strokeColor="red" />
               <Marker

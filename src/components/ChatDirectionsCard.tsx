@@ -162,7 +162,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
           text: resp.data.routes[0].legs[0].duration.text,
           value: resp.data.routes[0].legs[0].duration.value,
         })
-        // console.log(coordsArr)
+        // console.log(resp.data.routes[0].legs[0].steps)
         if (mapRef.current) {
           mapRef.current.fitToCoordinates(
             [
@@ -405,8 +405,8 @@ async function registerForPushNotificationsAsync() {
       alert('Failed to get push token for push notification!')
       return
     }
-    token = (await Notifications.getExpoPushTokenAsync()).data
-    console.log(token)
+    // token = (await Notifications.getExpoPushTokenAsync()).data
+    // console.log(token)
   } else {
     alert('Must use physical device for Push Notifications')
   }

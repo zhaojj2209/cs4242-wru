@@ -48,7 +48,11 @@ const SettingsTab = ({ navigation }: Props) => {
     if (uid != undefined) {
       const { status } = await requestMediaLibraryPermissionsAsync()
 
-      if (status != 'granted') {
+      if (status !== 'granted') {
+        Alert.alert(
+          'Unable to Access Photo Library',
+          "Please enable photo library permissions via your device's Settings page."
+        )
         return
       }
 

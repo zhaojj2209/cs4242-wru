@@ -107,9 +107,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
         setLoading(false)
       })
     })
-  }, [])
 
-  useEffect(() => {
     // Route and Event Details
     const now = moment()
     if (now.isAfter(event.endDate.toDate())) {

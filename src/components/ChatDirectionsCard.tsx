@@ -38,7 +38,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
       longitude: 0,
     },
   ])
-  const [loading, setLoading] = useState(true)
   const [routeLoaded, setRouteLoaded] = useState(false)
   const [routeReload, setRouteReload] = useState(false)
   const [routeDuration, setRouteDuration] = useState({
@@ -85,50 +84,52 @@ const ChatDirectionsCard = ({ event }: Props) => {
     }
   }, [])
 
-  // Location permissions
   useEffect(() => {
-    setCoords({
-      latitude: event.location.location.lat ?? 0,
-      longitude: event.location.location.lng ?? 0,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    })
-    requestForegroundPermissionsAsync().then(({ status }) => {
-      if (status !== 'granted') {
-        setHasLocPerms(false)
-        setLoading(false)
-        return
-      }
-      getCurrentPositionAsync().then((location) => {
-        setLocation({
-          lat: location.coords.latitude,
-          lng: location.coords.longitude,
-        })
-        setLoading(false)
-      })
-    })
+    if (routeReload) {
+      getDirections(location)
+      setRouteReload(false)
+    }
+  }, [routeReload])
 
-    // Route and Event Details
+  useEffect(() => {
     const now = moment()
     if (now.isAfter(event.endDate.toDate())) {
       setHasEnded(true)
     } else if (now.isAfter(event.startDate.toDate())) {
       setHasStarted(true)
     } else if (now.isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
-      if (!loading && !routeLoaded) {
-        getDirections(location)
-        setRouteLoaded(true)
-      }
       setUpcoming(true)
     } else {
       setUpcoming(false)
     }
+  })
 
-    if (routeReload) {
-      getDirections(location)
-      setRouteReload(false)
+  // Location permissions
+  useEffect(() => {
+    if (upcoming && !routeLoaded) {
+      setCoords({
+        latitude: event.location.location.lat ?? 0,
+        longitude: event.location.location.lng ?? 0,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      })
+      requestForegroundPermissionsAsync().then(({ status }) => {
+        if (status !== 'granted') {
+          setHasLocPerms(false)
+          return
+        }
+        getCurrentPositionAsync().then((location) => {
+          const locn = {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude,
+          }
+          setLocation(locn)
+          getDirections(locn)
+          setRouteLoaded(true)
+        })
+      })
     }
-  }, [location, routeReload])
+  }, [upcoming, routeLoaded])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
     const arrTimeStr = useArrTime ? '&arrival_time=' + event.startDate.seconds : ''
@@ -324,12 +325,9 @@ const ChatDirectionsCard = ({ event }: Props) => {
                 title={event.title}
               ></Marker>
             </MapView>
-            {routeDuration == undefined && (
-              <Text style={styles.title}>
-                Calculate your route and how long it will take you to get there!
-              </Text>
-            )}
-            {routeDuration != undefined && (
+            {routeDuration.text.length === 0 ? (
+              <Text style={styles.title}>Calculating route...</Text>
+            ) : (
               <Text style={styles.title}>It will take {routeDuration.text} to get there!</Text>
             )}
             <View style={styles.container}>

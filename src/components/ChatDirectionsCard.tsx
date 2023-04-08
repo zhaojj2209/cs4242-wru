@@ -106,10 +106,25 @@ const ChatDirectionsCard = ({ event }: Props) => {
 
   useEffect(() => {
     if (mapRef.current) {
+      const locn1 = { latitude: location.lat, longitude: location.lng }
+      const locn2 = { latitude: coords.latitude, longitude: coords.longitude }
+      if (locn1.latitude < locn2.latitude) {
+        locn1.latitude -= 0.002
+        locn2.latitude += 0.002
+      } else {
+        locn1.latitude += 0.002
+        locn2.latitude -= 0.002
+      }
+      if (locn1.longitude < locn2.longitude) {
+        locn1.longitude -= 0.002
+        locn2.longitude += 0.002
+      } else {
+        locn1.longitude += 0.002
+        locn2.longitude -= 0.002
+      }
       mapRef.current.fitToCoordinates(
         [
-          { latitude: location.lat, longitude: location.lng },
-          { latitude: coords.latitude, longitude: coords.longitude },
+          locn1, locn2
         ],
         {
           animated: true,

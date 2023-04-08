@@ -17,6 +17,7 @@ import { decode } from '@mapbox/polyline'
 import { createMapLink, createOpenLink } from 'react-native-open-maps'
 import moment from 'moment'
 import { api_key } from '../../config'
+import * as Device from 'expo-device'
 
 interface Props {
   event: EventChat
@@ -34,9 +35,12 @@ const ChatDirectionsCard = ({ event }: Props) => {
       longitude: 0,
     },
   ])
+  const [loading, setLoading] = useState(true)
+  const [routeLoaded, setRouteLoaded] = useState(false)
+  const [routeReload, setRouteReload] = useState(false)
   const [routeDuration, setRouteDuration] = useState()
   const [prefferedMode, setPrefferedMode] = useState('transit')
-  const [useArrTime, setUseArrTime] = useState(false)
+  const [useArrTime, setUseArrTime] = useState(true)
   const [openRouteDetails, setOpenRouteDetails] = useState(true)
 
   const mapRef = useRef<MapView>(null)
@@ -60,23 +64,36 @@ const ChatDirectionsCard = ({ event }: Props) => {
       longitudeDelta: 0.01,
     })
 
+    // setLoading(true)
+
     getCurrentPositionAsync().then((location) => {
       setLocation({
         lat: location.coords.latitude,
         lng: location.coords.longitude,
       })
+      setLoading(false)
     })
 
     if (moment().isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
+      if (!loading && !routeLoaded) {
+        getDirections(location) 
+        setRouteLoaded(true)
+      }
       setUpcoming(true)
     } else {
       setUpcoming(false)
     }
 
+    if (routeReload) {
+      getDirections(location)
+      setRouteReload(false)
+    }
+
     return () => {}
-  }, [])
+  }, [location, routeReload])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
+    var arrTimeStr = useArrTime ? '&arrival_time=' + event.startDate.seconds : ''
     const confg = {
       method: 'get',
       url:
@@ -87,8 +104,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
         '&destination=place_id:' +
         event.location.placeId +
         '&mode=' +
-        prefferedMode +
-        '&key=' +
+        prefferedMode + arrTimeStr +
+        '&key=' + 
         api_key,
       headers: {},
     }
@@ -108,6 +125,17 @@ const ChatDirectionsCard = ({ event }: Props) => {
         // console.log('duration: ' + resp.data.routes[0].legs[0].duration.text)
         setRouteDuration(resp.data.routes[0].legs[0].duration.text)
         // console.log(coordsArr)
+        if (mapRef.current) {
+          mapRef.current.fitToCoordinates(
+            [
+              { latitude: location.lat, longitude: location.lng },
+              { latitude: coords.latitude, longitude: coords.longitude },
+            ],
+            {
+              animated: true,
+            }
+          )
+        }
         return coordsArr
       })
       .catch((error) => {
@@ -118,6 +146,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
 
   const handleChange = (value: string) => {
     if (value !== null) {
+      setRouteReload(true)
       setPrefferedMode(value)
     }
   }
@@ -151,14 +180,26 @@ const ChatDirectionsCard = ({ event }: Props) => {
                 <ToggleButton icon="car" value="driving" />
                 <ToggleButton icon="bus" value="transit" />
               </ToggleButton.Row>
-              <Checkbox.Item
+              {/* <Checkbox.Item
                 style={styles.checkbox}
                 label="Use Arrival Time"
                 status={useArrTime ? 'checked' : 'unchecked'}
                 onPress={() => {
                   setUseArrTime(!useArrTime)
                 }}
-              />
+              /> */}
+              <Button
+                mode="contained-tonal"
+                style={styles.buttons}
+                onPress={createOpenLink({
+                  provider: 'google',
+                  start: location.lat + ',' + location.lng,
+                  end: event.location.description,
+                  travelType: prefferedMode === 'transit' ? 'public_transport' : 'drive',
+                })}
+              >
+                Open Route
+              </Button>
             </View>
             <MapView
               ref={mapRef}
@@ -198,7 +239,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
               <Text style={styles.title}>It will take {routeDuration} to get there!</Text>
             )}
             <View style={styles.container}>
-              <Button
+              {/* <Button
                 mode="contained"
                 style={styles.buttons}
                 onPress={() => {
@@ -206,19 +247,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
                 }}
               >
                 Calculate Route
-              </Button>
-              <Button
-                mode="contained-tonal"
-                style={styles.buttons}
-                onPress={createOpenLink({
-                  provider: 'google',
-                  start: location.lat + ',' + location.lng,
-                  end: event.location.description,
-                  travelType: prefferedMode === 'transit' ? 'public_transport' : 'drive',
-                })}
-              >
-                Open Route
-              </Button>
+              </Button> */}
+              
             </View>
             <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>
               Close

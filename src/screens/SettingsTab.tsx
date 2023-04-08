@@ -15,6 +15,7 @@ import {
   requestMediaLibraryPermissionsAsync,
 } from 'expo-image-picker'
 import { doc, updateDoc } from 'firebase/firestore'
+import { DEFAULT_PFP_URL } from '../util/const'
 
 type Props = CompositeScreenProps<
   MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
@@ -25,7 +26,7 @@ const SettingsTab = ({ navigation }: Props) => {
   const theme = useTheme()
 
   const [displayName, setDisplayName] = useState('')
-  const [photoURL, setPhotoURL] = useState('')
+  const [photoURL, setPhotoURL] = useState(DEFAULT_PFP_URL)
   const [isEditDisplayName, setIsEditDisplayName] = useState(false)
 
   const handleLogout = () => {

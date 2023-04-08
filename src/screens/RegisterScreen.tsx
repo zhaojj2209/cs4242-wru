@@ -6,6 +6,7 @@ import { auth, db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainStackParamList } from '../main/Main'
 import { doc, setDoc } from 'firebase/firestore'
+import { DEFAULT_PFP_URL } from '../util/const'
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Register'>
 
@@ -14,9 +15,6 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
   const [displayName, setDisplayName] = useState('')
-
-  const DEFAULT_PFP_URL =
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Default_pfp.svg/680px-Default_pfp.svg.png'
 
   const formatError = (msg: string) => {
     const msgCode = msg.split('auth/')[1]

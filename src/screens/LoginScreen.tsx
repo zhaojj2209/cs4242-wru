@@ -28,7 +28,7 @@ const LoginScreen = ({ navigation }: Props) => {
   }
 
   const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email.trim(), password)
       .then((userCredential) => {
         const user = userCredential.user
         console.log('Logged in with ' + user.email)

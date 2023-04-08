@@ -12,7 +12,7 @@ const SmallMapWithMarker = ({ location }: Props) => {
     <MapView
       provider="google"
       style={styles.map}
-      initialRegion={{
+      region={{
         latitude: location.location.lat,
         longitude: location.location.lng,
         latitudeDelta: 0.001,

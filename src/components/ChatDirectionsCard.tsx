@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Button, Card, Text, ToggleButton } from 'react-native-paper'
 import { EventChat } from '../util/types'
@@ -9,6 +9,17 @@ import { decode } from '@mapbox/polyline'
 import { createOpenLink } from 'react-native-open-maps'
 import moment from 'moment'
 import { api_key } from '../../config'
+import * as Device from 'expo-device'
+import * as Notifications from 'expo-notifications'
+import { Subscription } from 'expo-notifications/build/Notifications.types'
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+})
 
 interface Props {
   event: EventChat
@@ -29,12 +40,21 @@ const ChatDirectionsCard = ({ event }: Props) => {
   const [loading, setLoading] = useState(true)
   const [routeLoaded, setRouteLoaded] = useState(false)
   const [routeReload, setRouteReload] = useState(false)
-  const [routeDuration, setRouteDuration] = useState()
+  const [routeDuration, setRouteDuration] = useState({
+    text: '',
+    value: 0,
+  })
   const [prefferedMode, setPrefferedMode] = useState('transit')
   const [useArrTime, setUseArrTime] = useState(true)
   const [openRouteDetails, setOpenRouteDetails] = useState(true)
 
   const mapRef = useRef<MapView>(null)
+
+  //Notifications
+  const [expoPushToken, setExpoPushToken] = useState('')
+  const [notification, setNotification] = useState<Notifications.Notification>()
+  const notificationListener = useRef<Subscription>()
+  const responseListener = useRef<Subscription>()
 
   const sgCoords = {
     // Taken from google
@@ -48,6 +68,29 @@ const ChatDirectionsCard = ({ event }: Props) => {
   const [coords, setCoords] = useState(sgCoords)
 
   useEffect(() => {
+    //Notifications
+    registerForPushNotificationsAsync().then((token) => setExpoPushToken(token ?? ''))
+
+    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
+      setNotification(notification)
+    })
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log(response)
+    })
+
+    return () => {
+      if (notificationListener.current) {
+        Notifications.removeNotificationSubscription(notificationListener.current)
+      }
+
+      if (responseListener.current) {
+        Notifications.removeNotificationSubscription(responseListener.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     setCoords({
       latitude: event.location.location.lat ?? 0,
       longitude: event.location.location.lng ?? 0,
@@ -55,8 +98,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
       longitudeDelta: 0.01,
     })
 
-    // setLoading(true)
-
+    //Route and Event Details
     getCurrentPositionAsync().then((location) => {
       setLocation({
         lat: location.coords.latitude,
@@ -79,6 +121,9 @@ const ChatDirectionsCard = ({ event }: Props) => {
       getDirections(location)
       setRouteReload(false)
     }
+
+    //Notifications
+    return () => {}
   }, [location, routeReload])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
@@ -113,7 +158,10 @@ const ChatDirectionsCard = ({ event }: Props) => {
 
         setDirections(coordsArr)
         // console.log('duration: ' + resp.data.routes[0].legs[0].duration.text)
-        setRouteDuration(resp.data.routes[0].legs[0].duration.text)
+        setRouteDuration({
+          text: resp.data.routes[0].legs[0].duration.text,
+          value: resp.data.routes[0].legs[0].duration.value,
+        })
         // console.log(coordsArr)
         if (mapRef.current) {
           mapRef.current.fitToCoordinates(
@@ -126,7 +174,37 @@ const ChatDirectionsCard = ({ event }: Props) => {
             }
           )
         }
-        return coordsArr
+
+        //Notification
+        const timeToLeave = moment(event.startDate.toDate()).subtract(
+          resp.data.routes[0].legs[0].duration.value,
+          'seconds'
+        )
+        const timeToNotify = timeToLeave.subtract(10, 'minutes')
+        const triggerAt = timeToNotify.diff(moment(), 'seconds')
+        console.log(resp.data.routes[0].legs[0].duration.value)
+        console.log(timeToNotify.toLocaleString())
+        console.log(triggerAt)
+
+        //if already scheduled, update
+        Notifications.getAllScheduledNotificationsAsync().then((ntfArr) => {
+          const filteredNtfArr = ntfArr.filter((ele) => {
+            return ele.content.data.eventID == event.id
+          })
+          filteredNtfArr.forEach((ele) => {
+            Notifications.cancelScheduledNotificationAsync(ele.identifier)
+          })
+        })
+        if (triggerAt > 0) {
+          schedulePushNotification(
+            event.title,
+            event.startDate.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            event.id,
+            triggerAt
+          ).then(() => {
+            return coordsArr
+          })
+        }
       })
       .catch((error) => {
         console.log(error)
@@ -225,7 +303,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
               </Text>
             )}
             {routeDuration != undefined && (
-              <Text style={styles.title}>It will take {routeDuration} to get there!</Text>
+              <Text style={styles.title}>It will take {routeDuration.text} to get there!</Text>
             )}
             <View style={styles.container}>
               {/* <Button
@@ -236,8 +314,48 @@ const ChatDirectionsCard = ({ event }: Props) => {
                 }}
               >
                 Calculate Route
-              </Button> */}
+              </Button>
+              <Button
+                onPress={
+                  async () => {
+                    const timeToLeave = moment(event.startDate.toDate()).subtract(routeDuration.value, 'seconds')
+                    const timeToNotify = timeToLeave.subtract(10, 'minutes')
+                    const triggerAt = timeToNotify.diff(moment(), 'seconds')
+                    console.log(timeToNotify.toLocaleString())
+                    console.log(triggerAt)
+
+                    //if already scheduled, update
+                    Notifications.getAllScheduledNotificationsAsync().then((ntfArr) => {
+                      const filteredNtfArr = ntfArr.filter(ele => { return (ele.content.data.eventID == event.id)})
+                      filteredNtfArr.forEach((ele) => { Notifications.cancelScheduledNotificationAsync(ele.identifier) })
+                    })
+                    await schedulePushNotification(
+                      event.title, 
+                      event.startDate.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                      event.id,
+                      triggerAt
+                    );
+                  }
+                }
+              >Press to schedule a notification</Button> */}
+              <Button
+                onPress={() => {
+                  Notifications.cancelAllScheduledNotificationsAsync()
+                }}
+              >
+                Cancel All Notifications
+              </Button>
+              <Button
+                onPress={() => {
+                  Notifications.getAllScheduledNotificationsAsync().then((res) => {
+                    console.log(res)
+                  })
+                }}
+              >
+                Get All Notifications
+              </Button>
             </View>
+
             <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>
               Close
             </Button>
@@ -252,6 +370,60 @@ const ChatDirectionsCard = ({ event }: Props) => {
       </Card.Content>
     </Card>
   )
+}
+
+async function schedulePushNotification(
+  eventTitle: String,
+  eventStart: String,
+  eventID: string,
+  triggerAt: number
+) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Get Ready to Head Off! 🏃‍♂️',
+      body: 'Leave in about 10 mins to reach on time! ' + eventTitle + ' starts at ' + eventStart,
+      data: {
+        eventID: eventID,
+      },
+    },
+    trigger: {
+      seconds: triggerAt,
+    },
+  })
+}
+
+async function registerForPushNotificationsAsync() {
+  let token
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync()
+    let finalStatus = existingStatus
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync()
+      finalStatus = status
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!')
+      return
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data
+    console.log(token)
+  } else {
+    alert('Must use physical device for Push Notifications')
+  }
+
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      // sound: true,
+      lightColor: '#FF231F7C',
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      bypassDnd: true,
+    })
+  }
+
+  return token
 }
 
 export default ChatDirectionsCard

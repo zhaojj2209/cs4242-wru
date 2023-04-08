@@ -16,6 +16,7 @@ import {
 } from 'expo-image-picker'
 import { doc, updateDoc } from 'firebase/firestore'
 import { DEFAULT_PFP_URL } from '../util/const'
+import { requestForegroundPermissionsAsync } from 'expo-location'
 
 type Props = CompositeScreenProps<
   MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
@@ -28,12 +29,17 @@ const SettingsTab = ({ navigation }: Props) => {
   const [displayName, setDisplayName] = useState('')
   const [photoURL, setPhotoURL] = useState(DEFAULT_PFP_URL)
   const [isEditDisplayName, setIsEditDisplayName] = useState(false)
+  const [hasLocPerms, setHasLocPerms] = useState(false)
 
   const handleLogout = () => {
     signOut(auth).then(() => {
       navigation.replace('Login')
     })
   }
+
+  useEffect(() => {
+    requestForegroundPermissionsAsync().then(({ status }) => setHasLocPerms(status === 'granted'))
+  }, [])
 
   useEffect(() => {
     if (auth.currentUser?.photoURL) {
@@ -90,7 +96,7 @@ const SettingsTab = ({ navigation }: Props) => {
   const handleEditDisplayName = () => {
     if (isEditDisplayName) {
       setIsEditDisplayName(false)
-      if (auth.currentUser != null) {
+      if (auth.currentUser != null && displayName !== auth.currentUser.displayName) {
         updateProfile(auth.currentUser, { displayName })
         updateDoc(doc(db, 'users', auth.currentUser.uid), { displayName })
       }
@@ -137,6 +143,16 @@ const SettingsTab = ({ navigation }: Props) => {
             {displayName.length > 0 ? displayName : 'None'}
           </Text>
         )}
+      </View>
+      <View style={styles.setting}>
+        <View style={styles.header}>
+          <Text variant="bodyLarge" style={styles.text}>
+            Allow App to Use Location:
+          </Text>
+        </View>
+        <Text variant="bodyLarge" style={styles.text}>
+          {(hasLocPerms ? 'Yes' : 'No') + " (You may change this in your device's settings)"}
+        </Text>
       </View>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
         Log Out

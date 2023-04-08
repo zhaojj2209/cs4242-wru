@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { Button, Card, Checkbox, Text, ToggleButton } from 'react-native-paper'
+import { Button, Card, Text, ToggleButton } from 'react-native-paper'
 import { EventChat } from '../util/types'
 import MapView, { Marker, Polyline } from 'react-native-maps'
 import { getCurrentPositionAsync } from 'expo-location'
@@ -9,7 +9,6 @@ import { decode } from '@mapbox/polyline'
 import { createOpenLink } from 'react-native-open-maps'
 import moment from 'moment'
 import { api_key } from '../../config'
-import * as Device from 'expo-device'
 
 interface Props {
   event: EventChat
@@ -68,7 +67,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
 
     if (moment().isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
       if (!loading && !routeLoaded) {
-        getDirections(location) 
+        getDirections(location)
         setRouteLoaded(true)
       }
       setUpcoming(true)
@@ -80,7 +79,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
       getDirections(location)
       setRouteReload(false)
     }
-
   }, [location, routeReload])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
@@ -95,8 +93,9 @@ const ChatDirectionsCard = ({ event }: Props) => {
         '&destination=place_id:' +
         event.location.placeId +
         '&mode=' +
-        prefferedMode + arrTimeStr +
-        '&key=' + 
+        prefferedMode +
+        arrTimeStr +
+        '&key=' +
         api_key,
       headers: {},
     }
@@ -238,7 +237,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
               >
                 Calculate Route
               </Button> */}
-              
             </View>
             <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>
               Close

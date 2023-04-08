@@ -47,23 +47,22 @@ const MapScreen = ({ navigation }: Props) => {
   const [hasCoords, setHasCoords] = useState(false)
 
   useEffect(() => {
-    ;(async () => {
-      const { status } = await requestForegroundPermissionsAsync()
+    requestForegroundPermissionsAsync().then(({ status }) => {
       if (status !== 'granted') {
         setLoading(false)
         return
       }
-
-      const location = await getCurrentPositionAsync({})
-      setCoords({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
+      getCurrentPositionAsync().then((location) => {
+        setCoords({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        })
+        setLoading(false)
+        setHasCoords(true)
       })
-      setLoading(false)
-      setHasCoords(true)
-    })()
+    })
   }, [])
 
   useFocusEffect(

@@ -183,7 +183,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
       .then((resp) => {
         // let respJson = JSON.stringify(resp.data)
         const points = decode(resp.data.routes[0].overview_polyline.points)
-        const coordsArr = points.map((point, index) => {
+        const coordsArr = points.map((point) => {
           return {
             latitude: point[0],
             longitude: point[1],
@@ -293,14 +293,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
                 <ToggleButton icon="car" value="driving" />
                 <ToggleButton icon="bus" value="transit" />
               </ToggleButton.Row>
-              {/* <Checkbox.Item
-                style={styles.checkbox}
-                label="Use Arrival Time"
-                status={useArrTime ? 'checked' : 'unchecked'}
-                onPress={() => {
-                  setUseArrTime(!useArrTime)
-                }}
-              /> */}
               <Button
                 mode="contained-tonal"
                 style={styles.buttons}
@@ -336,54 +328,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
               <Text style={styles.title}>It will take {routeDuration.text} to get there!</Text>
             )}
             <View style={styles.container}>
-              {/* <Button
-                mode="contained"
-                style={styles.buttons}
-                onPress={() => {
-                  getDirections(location)
-                }}
-              >
-                Calculate Route
-              </Button>
-              <Button
-                onPress={
-                  async () => {
-                    const timeToLeave = moment(event.startDate.toDate()).subtract(routeDuration.value, 'seconds')
-                    const timeToNotify = timeToLeave.subtract(10, 'minutes')
-                    const triggerAt = timeToNotify.diff(moment(), 'seconds')
-                    console.log(timeToNotify.toLocaleString())
-                    console.log(triggerAt)
-
-                    //if already scheduled, update
-                    Notifications.getAllScheduledNotificationsAsync().then((ntfArr) => {
-                      const filteredNtfArr = ntfArr.filter(ele => { return (ele.content.data.eventID == event.id)})
-                      filteredNtfArr.forEach((ele) => { Notifications.cancelScheduledNotificationAsync(ele.identifier) })
-                    })
-                    await schedulePushNotification(
-                      event.title, 
-                      event.startDate.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                      event.id,
-                      triggerAt
-                    );
-                  }
-                }
-              >Press to schedule a notification</Button> */}
-              <Button
-                onPress={() => {
-                  Notifications.cancelAllScheduledNotificationsAsync()
-                }}
-              >
-                Cancel All Notifications
-              </Button>
-              <Button
-                onPress={() => {
-                  Notifications.getAllScheduledNotificationsAsync().then((res) => {
-                    console.log(res)
-                  })
-                }}
-              >
-                Get All Notifications
-              </Button>
             </View>
 
             <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>

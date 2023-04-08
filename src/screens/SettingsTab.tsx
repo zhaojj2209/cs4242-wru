@@ -17,6 +17,7 @@ import {
 import { doc, updateDoc } from 'firebase/firestore'
 import { DEFAULT_PFP_URL } from '../util/const'
 import { requestForegroundPermissionsAsync } from 'expo-location'
+import * as Notifications from 'expo-notifications'
 
 type Props = CompositeScreenProps<
   MaterialBottomTabScreenProps<HomeTabParamList, 'SettingsTab'>,
@@ -30,6 +31,7 @@ const SettingsTab = ({ navigation }: Props) => {
   const [photoURL, setPhotoURL] = useState(DEFAULT_PFP_URL)
   const [isEditDisplayName, setIsEditDisplayName] = useState(false)
   const [hasLocPerms, setHasLocPerms] = useState(false)
+  const [hasNotifPerms, setHasNotifPerms] = useState(false)
 
   const handleLogout = () => {
     signOut(auth).then(() => {
@@ -39,6 +41,10 @@ const SettingsTab = ({ navigation }: Props) => {
 
   useEffect(() => {
     requestForegroundPermissionsAsync().then(({ status }) => setHasLocPerms(status === 'granted'))
+  }, [])
+
+  useEffect(() => {
+    Notifications.getPermissionsAsync().then(({ status }) => setHasNotifPerms(status === 'granted'))
   }, [])
 
   useEffect(() => {
@@ -119,16 +125,8 @@ const SettingsTab = ({ navigation }: Props) => {
         </View>
       </TouchableHighlight>
       <View style={styles.setting}>
-        <Text variant="bodyLarge" style={styles.text}>
-          Email:
-        </Text>
-        <Text variant="bodyLarge" style={styles.text}>
-          {auth.currentUser?.email}
-        </Text>
-      </View>
-      <View style={styles.setting}>
         <View style={styles.header}>
-          <Text variant="bodyLarge" style={styles.text}>
+          <Text variant="bodyLarge">
             Display Name:
           </Text>
           <IconButton
@@ -136,22 +134,40 @@ const SettingsTab = ({ navigation }: Props) => {
             onPress={handleEditDisplayName}
           />
         </View>
-        {isEditDisplayName ? (
-          <TextInput value={displayName} onChangeText={(text) => setDisplayName(text)} />
-        ) : (
-          <Text variant="bodyLarge" style={styles.text}>
-            {displayName.length > 0 ? displayName : 'None'}
-          </Text>
-        )}
+        <TextInput value={displayName} onChangeText={(text) => setDisplayName(text)} disabled={!isEditDisplayName} />
       </View>
-      <View style={styles.setting}>
-        <View style={styles.header}>
-          <Text variant="bodyLarge" style={styles.text}>
+      <View style={styles.row}>
+        <Text variant="bodyLarge">
+          Email:
+        </Text>
+        <Text variant="bodyLarge">
+          {auth.currentUser?.email}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <View style={styles.setting}>
+          <Text variant="bodyLarge">
             Allow App to Use Location:
           </Text>
+          <Text>
+            (You may change this in your device&apos;s settings)
+          </Text>
         </View>
-        <Text variant="bodyLarge" style={styles.text}>
-          {(hasLocPerms ? 'Yes' : 'No') + " (You may change this in your device's settings)"}
+        <Text variant="bodyLarge">
+          {hasLocPerms ? 'Yes' : 'No'}
+        </Text>
+      </View>
+      <View style={styles.row}>
+        <View style={styles.setting}>
+          <Text variant="bodyLarge">
+            Allow Notifications:
+          </Text>
+          <Text>
+            (You may change this in your device&apos;s settings)
+          </Text>
+        </View>
+        <Text variant="bodyLarge">
+          {hasNotifPerms ? 'Yes' : 'No'}
         </Text>
       </View>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
@@ -179,8 +195,11 @@ const styles = StyleSheet.create({
   setting: {
     width: '80%',
   },
-  text: {
-    marginVertical: 16,
+  row: {
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
   header: {
     flexDirection: 'row',

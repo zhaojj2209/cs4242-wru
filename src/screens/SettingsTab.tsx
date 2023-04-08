@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
   },
   pfp: {
     alignItems: 'center',
+    marginTop: 20,
   },
   setting: {
     width: '80%',

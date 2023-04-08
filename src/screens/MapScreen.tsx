@@ -25,19 +25,12 @@ import {
   tokenize,
 } from '../util/eventRecommendation'
 import { useFocusEffect } from '@react-navigation/native'
+import { SG_COORDS } from '../util/const'
 
 type Props = NativeStackScreenProps<DiscoverStackParamList, 'Map'>
 
 const MapScreen = ({ navigation }: Props) => {
-  const sgCoords = {
-    // Taken from google
-    latitude: 1.3521,
-    longitude: 103.8198,
-    // Rough estimate to fit entire Sg map
-    latitudeDelta: 0.8,
-    longitudeDelta: 0.1,
-  }
-  const [coords, setCoords] = useState(sgCoords)
+  const [coords, setCoords] = useState(SG_COORDS)
   const [loading, setLoading] = useState(true)
   const [events, setEvents] = useState<EventChat[]>([])
   const [searchQuery, setSearchQuery] = useState('')

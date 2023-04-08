@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button, Card, Text, ToggleButton } from 'react-native-paper'
 import { EventChat } from '../util/types'
 import MapView, { Marker, Polyline } from 'react-native-maps'
-import { getCurrentPositionAsync } from 'expo-location'
+import { getCurrentPositionAsync, requestForegroundPermissionsAsync } from 'expo-location'
 import axios from 'axios'
 import { decode } from '@mapbox/polyline'
 import { createOpenLink } from 'react-native-open-maps'
@@ -12,6 +12,7 @@ import { api_key } from '../../config'
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
 import { Subscription } from 'expo-notifications/build/Notifications.types'
+import { SG_COORDS } from '../util/const'
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -47,6 +48,9 @@ const ChatDirectionsCard = ({ event }: Props) => {
   const [prefferedMode, setPrefferedMode] = useState('transit')
   const [useArrTime, setUseArrTime] = useState(true)
   const [openRouteDetails, setOpenRouteDetails] = useState(true)
+  const [hasLocPerms, setHasLocPerms] = useState(true)
+  const [hasStarted, setHasStarted] = useState(false)
+  const [hasEnded, setHasEnded] = useState(false)
 
   const mapRef = useRef<MapView>(null)
 
@@ -56,16 +60,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
   const notificationListener = useRef<Subscription>()
   const responseListener = useRef<Subscription>()
 
-  const sgCoords = {
-    // Taken from google
-    latitude: 1.3521,
-    longitude: 103.8198,
-    // Rough estimate to fit entire Sg map
-    latitudeDelta: 0.8,
-    longitudeDelta: 0.1,
-  }
-
-  const [coords, setCoords] = useState(sgCoords)
+  const [coords, setCoords] = useState(SG_COORDS)
 
   useEffect(() => {
     //Notifications
@@ -90,6 +85,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
     }
   }, [])
 
+  // Location permissions
   useEffect(() => {
     setCoords({
       latitude: event.location.location.lat ?? 0,
@@ -97,17 +93,30 @@ const ChatDirectionsCard = ({ event }: Props) => {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     })
-
-    //Route and Event Details
-    getCurrentPositionAsync().then((location) => {
-      setLocation({
-        lat: location.coords.latitude,
-        lng: location.coords.longitude,
+    requestForegroundPermissionsAsync().then(({ status }) => {
+      if (status !== 'granted') {
+        setHasLocPerms(false)
+        setLoading(false)
+        return
+      }
+      getCurrentPositionAsync().then((location) => {
+        setLocation({
+          lat: location.coords.latitude,
+          lng: location.coords.longitude,
+        })
+        setLoading(false)
       })
-      setLoading(false)
     })
+  }, [])
 
-    if (moment().isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
+  useEffect(() => {
+    // Route and Event Details
+    const now = moment()
+    if (now.isAfter(event.endDate.toDate())) {
+      setHasEnded(true)
+    } else if (now.isAfter(event.startDate.toDate())) {
+      setHasStarted(true)
+    } else if (now.isAfter(moment(event.startDate.toDate()).subtract(1, 'days'))) {
       if (!loading && !routeLoaded) {
         getDirections(location)
         setRouteLoaded(true)
@@ -121,9 +130,6 @@ const ChatDirectionsCard = ({ event }: Props) => {
       getDirections(location)
       setRouteReload(false)
     }
-
-    //Notifications
-    return () => {}
   }, [location, routeReload])
 
   const getDirections = async (startLoc: { lat: number; lng: number }) => {
@@ -223,16 +229,39 @@ const ChatDirectionsCard = ({ event }: Props) => {
     return eventTime.fromNow()
   }
 
+  const getCardTitle = () => {
+    if (hasEnded) {
+      return event.title + ' has ended'
+    }
+    if (hasStarted) {
+      return event.title + ' has started ' + calculateTimeToEvent()
+    }
+    return event.title + ' starts ' + calculateTimeToEvent()
+  }
+
   return (
     <Card mode="elevated" style={styles.card}>
-      <Card.Title
-        title={event.title + ' starts ' + calculateTimeToEvent()}
-        titleVariant="titleLarge"
-        style={styles.title}
-      />
+      <Card.Title title={getCardTitle()} titleVariant="titleLarge" style={styles.title} />
       <Card.Content>
-        {!upcoming && <Text style={styles.text}>Rest easy!</Text>}
-        {upcoming && openRouteDetails && (
+        {hasEnded && (
+          <Text style={styles.text}>
+            You can still use this chat to talk to fellow event-goers!
+          </Text>
+        )}
+        {!hasEnded && !hasStarted && !upcoming && <Text style={styles.text}>Rest easy!</Text>}
+        {upcoming && openRouteDetails && !hasLocPerms && (
+          <View>
+            <Text style={styles.text} variant="bodyMedium">
+              We are unable to provide route information because we do not have permissions to
+              access your current location. Please enable location permissions via your
+              device&apos;s Settings page.
+            </Text>
+            <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>
+              Close
+            </Button>
+          </View>
+        )}
+        {upcoming && openRouteDetails && hasLocPerms && (
           <View>
             <Text style={styles.text} variant="bodyMedium">
               Start planning your trip:
@@ -373,8 +402,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
 }
 
 async function schedulePushNotification(
-  eventTitle: String,
-  eventStart: String,
+  eventTitle: string,
+  eventStart: string,
   eventID: string,
   triggerAt: number
 ) {

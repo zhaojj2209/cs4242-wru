@@ -125,7 +125,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
     if (!details || !auth.currentUser) {
       return
     }
-    Alert.alert(`Remvove ${user.displayName ?? user.email}?`, '', [
+    Alert.alert(`Remove ${user.displayName ?? user.email}?`, '', [
       {
         text: 'OK',
         onPress: () => {

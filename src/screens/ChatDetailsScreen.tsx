@@ -1,6 +1,15 @@
 import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Appbar, Avatar, Button, Card, IconButton, List, Text } from 'react-native-paper'
+import {
+  ActivityIndicator,
+  Appbar,
+  Avatar,
+  Button,
+  Card,
+  IconButton,
+  List,
+  Text,
+} from 'react-native-paper'
 import { HomeStackParamList } from './HomeScreen'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useFocusEffect } from '@react-navigation/native'
@@ -126,9 +135,7 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
           updateDoc(doc(db, 'chats', chatID), {
             members: details.members,
           })
-            .then(() =>
-              setMembers(members.filter((member) => member.uid !== user.uid))
-            )
+            .then(() => setMembers(members.filter((member) => member.uid !== user.uid)))
             .catch((error) => Alert.alert(error))
         },
       },
@@ -172,9 +179,17 @@ const ChatDetailsScreen = ({ route, navigation }: Props) => {
                     left={(props) => (
                       <Avatar.Image {...props} size={48} source={{ uri: member.photoURL }} />
                     )}
-                    right={(props) => isCreator && member.uid !== details?.creator ? (
-                      <IconButton {...props} icon="account-remove" onPress={() => handleRemove(member)} />
-                    ) : <></>}
+                    right={(props) =>
+                      isCreator && member.uid !== details?.creator ? (
+                        <IconButton
+                          {...props}
+                          icon="account-remove"
+                          onPress={() => handleRemove(member)}
+                        />
+                      ) : (
+                        <></>
+                      )
+                    }
                   />
                 ))}
               </List.Section>

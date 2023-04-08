@@ -3,12 +3,12 @@ import React from 'react'
 import { Appbar } from 'react-native-paper'
 import { db } from '../db/firebase'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { ChatsStackParamList } from './ChatsTab'
 import { addDoc, collection } from 'firebase/firestore'
 import EventChatForm from '../components/EventChatForm'
 import { EventChatFormParams } from '../util/types'
+import { HomeStackParamList } from './HomeScreen'
 
-type Props = NativeStackScreenProps<ChatsStackParamList, 'CreateChat'>
+type Props = NativeStackScreenProps<HomeStackParamList, 'CreateChat'>
 
 const CreateChatScreen = ({ navigation }: Props) => {
   const handleCreateChat = (data: EventChatFormParams) => {

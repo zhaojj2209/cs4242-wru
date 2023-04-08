@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 16,
     right: 0,
-    top: 50,
+    bottom: 0,
   },
   recommendedLabel: {
     marginTop: 20,

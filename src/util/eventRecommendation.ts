@@ -153,8 +153,9 @@ const calcTfIdf = (
     let dfSum = 0
     Object.keys(index).forEach((key) => {
       if (key.startsWith(token)) {
-        dfSum += index[key] * (token.length / key.length)
-        numDfTerms += 1
+        const ratio = token.length / key.length
+        dfSum += index[key] * ratio
+        numDfTerms += ratio
       }
     })
     const df = numDfTerms === 0 ? 0 : dfSum / numDfTerms

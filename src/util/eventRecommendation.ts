@@ -30,7 +30,7 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
   notJoinedEvents.forEach((event) => {
     const numSharedMembers = otherUsers.filter((token) => event.members.includes(token)).length
     const membersScore = l(numSharedMembers + 1) * inverselog20
-    const tagsScore = calcMatchRatio(tags, event.tags)
+    const tagsScore = calcMatchRatio(tags.map((token) => token.toLocaleLowerCase()), event.tags.map((token) => token.toLocaleLowerCase()))
     const totalScore = membersScore * MEMBERS_REC_WEIGHT + tagsScore * TAGS_REC_WEIGHT
     if (currLoc) {
       const distScore = getDistanceScore(event.location.location, currLoc)
@@ -67,7 +67,7 @@ export const getSearchedEventsInOrder = (
     const titleScore = calcTfIdf(tokenize(event.title), queryTokens, titleIndex)
     const descScore = calcTfIdf(tokenize(event.description), queryTokens, descIndex)
     const locnScore = calcTfIdf(tokenize(event.location.description), queryTokens, locnIndex)
-    const tagsScore = calcTfIdf(event.tags, queryTokens, tagsIndex)
+    const tagsScore = calcTfIdf(event.tags.map((token) => token.toLocaleLowerCase()), queryTokens, tagsIndex)
     const totalScore =
       titleScore * TITLE_SEARCH_WEIGHT +
       descScore * DESC_SEARCH_WEIGHT +

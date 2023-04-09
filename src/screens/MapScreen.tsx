@@ -92,7 +92,7 @@ const MapScreen = ({ navigation }: Props) => {
     () => buildIndex(events.map((event) => tokenize(event.location.description))),
     [events]
   )
-  const tagsIndex = useMemo(() => buildIndex(events.map((event) => event.tags)), [events])
+  const tagsIndex = useMemo(() => buildIndex(events.map((event) => event.tags.map((token) => token.toLocaleLowerCase()))), [events])
 
   useEffect(() => {
     setRecommendedEvents(

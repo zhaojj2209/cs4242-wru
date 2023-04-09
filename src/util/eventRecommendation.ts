@@ -148,6 +148,9 @@ const calcTfIdf = (
     const tfidf = logTf * idf
     sumSquares += tfidf ** 2
   })
+  if (sumSquares === 0) {
+    return 0
+  }
 
   return 1 / r(sumSquares)
 }

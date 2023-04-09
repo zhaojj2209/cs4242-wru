@@ -7,6 +7,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { MainStackParamList } from '../main/Main'
 import { doc, setDoc } from 'firebase/firestore'
 import { DEFAULT_PFP_URL } from '../util/const'
+import * as Notifications from 'expo-notifications'
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Register'>
 
@@ -45,7 +46,10 @@ const RegisterScreen = ({ navigation }: Props) => {
           displayName,
           photoURL: DEFAULT_PFP_URL,
         })
-          .then(() => navigation.navigate('Home'))
+          .then(() => {
+            Notifications.requestPermissionsAsync()
+            navigation.navigate('Home')
+          })
           .catch((error) => Alert.alert(error))
       })
       .catch((error) => Alert.alert(formatError(error.message)))

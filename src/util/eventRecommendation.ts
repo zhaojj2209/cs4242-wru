@@ -141,9 +141,23 @@ const calcTfIdf = (
   }
   let sumSquares = 0
   queryTokens.forEach((token) => {
-    const rawTf = docTokens.filter((docToken) => docToken === token).length
+    let rawTf = 0
+    docTokens.forEach((docToken) => {
+      if (docToken.startsWith(token)) {
+        rawTf += token.length / docToken.length
+      }
+    })
+
     const logTf = rawTf === 0 ? 0 : 1 + l(rawTf)
-    const df = index[token] ?? 0
+    let numDfTerms = 0
+    let dfSum = 0
+    Object.keys(index).forEach((key) => {
+      if (key.startsWith(token)) {
+        dfSum += index[key] * (token.length / key.length)
+        numDfTerms += 1
+      }
+    })
+    const df = numDfTerms === 0 ? 0 : dfSum / numDfTerms
     const idf = df === 0 ? 0 : l(index[COLLECTION_SIZE] / df)
     const tfidf = logTf * idf
     sumSquares += tfidf ** 2

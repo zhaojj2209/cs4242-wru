@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, StyleSheet, View } from 'react-native'
 import React from 'react'
 import { Appbar } from 'react-native-paper'
 import { db } from '../db/firebase'
@@ -23,7 +23,9 @@ const CreateChatScreen = ({ navigation }: Props) => {
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Create Chat" />
       </Appbar.Header>
-      <EventChatForm navigation={navigation} onSubmit={handleCreateChat} />
+      <KeyboardAvoidingView behavior="padding">
+        <EventChatForm navigation={navigation} onSubmit={handleCreateChat} />
+      </KeyboardAvoidingView>
     </View>
   )
 }

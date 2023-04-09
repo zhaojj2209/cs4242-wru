@@ -320,7 +320,8 @@ const ChatDirectionsCard = ({ event }: Props) => {
             {routeDuration.text.length === 0 ? (
               <Text style={styles.title}>Calculating route...</Text>
             ) : (
-              <Text style={styles.title}>It will take {routeDuration.text} to get there!</Text>
+              <Text style={styles.title}>Calculated route will take approximately {routeDuration.text}. 
+              Head off before {moment(event.startDate.toDate()).subtract(routeDuration.value, 'seconds').toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} to get there on time!</Text>
             )}
             <View style={styles.container}></View>
 

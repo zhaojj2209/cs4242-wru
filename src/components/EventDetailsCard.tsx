@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React from 'react'
-import { Card, Divider, Text } from 'react-native-paper'
+import { Card, Chip, Divider, Text } from 'react-native-paper'
 import { EventChat } from '../util/types'
 import SmallMapWithMarker from './SmallMapWithMarker'
 
@@ -30,6 +30,18 @@ const EventDetailsCard = ({ details }: Props) => {
           Location: {details.location.description}
         </Text>
         <SmallMapWithMarker location={details.location} />
+        {details.tags.length > 0 && (
+          <Text variant="titleMedium" style={styles.text}>
+            Tags:
+          </Text>
+        )}
+        <View style={styles.row}>
+          {details.tags.map((tag, index) => (
+            <Chip key={index} style={styles.chip}>
+              {tag}
+            </Chip>
+          ))}
+        </View>
       </Card.Content>
     </Card>
   )
@@ -43,5 +55,12 @@ const styles = StyleSheet.create({
   },
   text: {
     paddingVertical: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  chip: {
+    marginHorizontal: 5,
   },
 })

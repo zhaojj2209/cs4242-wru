@@ -126,49 +126,35 @@ const SettingsTab = ({ navigation }: Props) => {
       </TouchableHighlight>
       <View style={styles.setting}>
         <View style={styles.header}>
-          <Text variant="bodyLarge">
-            Display Name:
-          </Text>
+          <Text variant="bodyLarge">Display Name:</Text>
           <IconButton
             icon={isEditDisplayName ? 'content-save' : 'pencil'}
             onPress={handleEditDisplayName}
           />
         </View>
-        <TextInput value={displayName} onChangeText={(text) => setDisplayName(text)} disabled={!isEditDisplayName} />
+        <TextInput
+          value={displayName}
+          onChangeText={(text) => setDisplayName(text)}
+          disabled={!isEditDisplayName}
+        />
       </View>
       <View style={styles.row}>
-        <Text variant="bodyLarge">
-          Email:
-        </Text>
-        <Text variant="bodyLarge">
-          {auth.currentUser?.email}
-        </Text>
-      </View>
-      <View style={styles.row}>
-        <View style={styles.setting}>
-          <Text variant="bodyLarge">
-            Allow App to Use Location:
-          </Text>
-          <Text>
-            (You may change this in your device&apos;s settings)
-          </Text>
-        </View>
-        <Text variant="bodyLarge">
-          {hasLocPerms ? 'Yes' : 'No'}
-        </Text>
+        <Text variant="bodyLarge">Email:</Text>
+        <Text variant="bodyLarge">{auth.currentUser?.email}</Text>
       </View>
       <View style={styles.row}>
         <View style={styles.setting}>
-          <Text variant="bodyLarge">
-            Allow Notifications:
-          </Text>
-          <Text>
-            (You may change this in your device&apos;s settings)
-          </Text>
+          <Text variant="bodyLarge">Allow App to Use Location:</Text>
+          <Text>(You may change this in your device&apos;s settings)</Text>
         </View>
-        <Text variant="bodyLarge">
-          {hasNotifPerms ? 'Yes' : 'No'}
-        </Text>
+        <Text variant="bodyLarge">{hasLocPerms ? 'Yes' : 'No'}</Text>
+      </View>
+      <View style={styles.row}>
+        <View style={styles.setting}>
+          <Text variant="bodyLarge">Allow Notifications:</Text>
+          <Text>(You may change this in your device&apos;s settings)</Text>
+        </View>
+        <Text variant="bodyLarge">{hasNotifPerms ? 'Yes' : 'No'}</Text>
       </View>
       <Button mode="outlined" onPress={handleLogout} style={styles.button}>
         Log Out
@@ -199,7 +185,7 @@ const styles = StyleSheet.create({
     width: '80%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',

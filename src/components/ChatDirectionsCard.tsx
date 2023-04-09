@@ -122,14 +122,9 @@ const ChatDirectionsCard = ({ event }: Props) => {
         locn1.longitude += 0.002
         locn2.longitude -= 0.002
       }
-      mapRef.current.fitToCoordinates(
-        [
-          locn1, locn2
-        ],
-        {
-          animated: true,
-        }
-      )
+      mapRef.current.fitToCoordinates([locn1, locn2], {
+        animated: true,
+      })
     }
   }, [location])
 
@@ -327,8 +322,7 @@ const ChatDirectionsCard = ({ event }: Props) => {
             ) : (
               <Text style={styles.title}>It will take {routeDuration.text} to get there!</Text>
             )}
-            <View style={styles.container}>
-            </View>
+            <View style={styles.container}></View>
 
             <Button icon="menu-up" onPress={() => setOpenRouteDetails(false)}>
               Close

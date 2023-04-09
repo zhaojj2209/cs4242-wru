@@ -46,10 +46,10 @@ export const sortInRecommendedOrder = (events: EventChat[], currLoc?: GoogLatLng
 // Search order
 
 const TITLE_SEARCH_WEIGHT = 0.3
-const DESC_SEARCH_WEIGHT = 0.2
+const DESC_SEARCH_WEIGHT = 0.1
 const LOCN_SEARCH_WEIGHT = 0.2
-const TAGS_SEARCH_WEIGHT = 0.15
-const DIST_SEARCH_WEIGHT = 0.15
+const TAGS_SEARCH_WEIGHT = 0.2
+const DIST_SEARCH_WEIGHT = 0.2
 
 export const getSearchedEventsInOrder = (
   events: EventChat[],

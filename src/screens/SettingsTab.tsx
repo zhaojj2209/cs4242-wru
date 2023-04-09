@@ -111,6 +111,11 @@ const SettingsTab = ({ navigation }: Props) => {
     }
   }
 
+  const handleCancelEdit = () => {
+    setIsEditDisplayName(false)
+    setDisplayName(auth.currentUser?.displayName ?? '')
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <TouchableHighlight
@@ -131,6 +136,12 @@ const SettingsTab = ({ navigation }: Props) => {
             icon={isEditDisplayName ? 'content-save' : 'pencil'}
             onPress={handleEditDisplayName}
           />
+          {isEditDisplayName && (
+            <IconButton
+              icon="close-thick"
+              onPress={handleCancelEdit}
+            />
+          )}
         </View>
         <TextInput
           value={displayName}
